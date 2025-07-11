@@ -3,317 +3,370 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تشخیص زنده با هوش مصنوعی</title>
-    <!-- Tailwind CSS for styling -->
+    <title>SecureNet VPN - سریع، امن، بدون محدودیت</title>
+    
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- TensorFlow.js Core -->
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-core"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-converter"></script>
-    <!-- TensorFlow.js Backend (CPU & WebGL) -->
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-backend-cpu"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-backend-webgl"></script>
-    <!-- COCO-SSD Model for Object Detection -->
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd"></script>
-    <!-- Hand Pose Detection Model -->
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/hand-pose-detection"></script>
-    <!-- Face-API.js for Face & Expression Detection -->
-    <script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
+    
+    <!-- Google Fonts (Vazirmatn) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700&display=swap" rel="stylesheet">
 
     <style>
-        /* Custom styles for the application */
         body {
-            font-family: 'Vazirmatn', sans-serif; /* A nice Persian font */
+            font-family: 'Vazirmatn', sans-serif;
+            background-color: #0d1117;
+            color: #c9d1d9;
         }
-        @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;700&display=swap');
-        
-        /* Position the canvas directly on top of the video */
-        .video-container {
+        .glass-effect {
+            background: rgba(22, 27, 34, 0.6);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(48, 54, 61, 0.5);
+        }
+        .btn-primary {
+            background: linear-gradient(90deg, #00c6ff, #0072ff);
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 157, 255, 0.3);
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 157, 255, 0.5);
+        }
+        .pricing-toggle-bg {
+            background-color: #161b22;
+        }
+        .pricing-toggle-btn {
+            background-color: #0072ff;
+            transition: transform 0.3s ease;
+        }
+        /* World Map Animation */
+        #world-map-container {
             position: relative;
-            width: 100%;
-            max-width: 720px;
-            border-radius: 0.5rem;
             overflow: hidden;
         }
-        #canvas {
+        .server-point {
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            width: 12px;
+            height: 12px;
+            background-color: #00c6ff;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: transform 0.2s ease;
         }
-        #video {
-            display: block;
-            width: 100%;
-            height: auto;
+        .server-point::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background-color: rgba(0, 198, 255, 0.3);
+            animation: pulse 2s infinite;
         }
-        /* Style for active button */
-        .btn-active {
-            background-color: #1d4ed8; /* A darker blue */
-            color: white;
-            transform: scale(1.05);
+        .server-point:hover {
+            transform: scale(1.5);
         }
+        @keyframes pulse {
+            0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0.7; }
+            70% { transform: translate(-50%, -50%) scale(1.5); opacity: 0; }
+            100% { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
+        }
+        .faq-item-header { transition: background-color 0.3s; }
+        .faq-item-header:hover { background-color: #1c222b; }
+        .faq-icon { transition: transform 0.3s; }
     </style>
 </head>
-<body class="bg-gray-100 flex flex-col items-center justify-center min-h-screen p-4">
+<body class="antialiased">
 
-    <div class="w-full max-w-4xl mx-auto">
-        <header class="text-center mb-6">
-            <h1 class="text-3xl md:text-4xl font-bold text-gray-800">تشخیص زنده با هوش مصنوعی</h1>
-            <p class="text-gray-600 mt-2">بین حالت‌های مختلف جابجا شوید تا اشیاء، دست‌ها یا حالات چهره را تشخیص دهید.</p>
-        </header>
-
-        <!-- Control Buttons -->
-        <div id="controls" class="flex justify-center items-center gap-2 md:gap-4 mb-4">
-            <button id="objectBtn" class="control-btn px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-75 transition-transform duration-200">
-                🔎 تشخیص اشیاء
-            </button>
-            <button id="handBtn" class="control-btn px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-75 transition-transform duration-200">
-                🖐️ تشخیص دست
-            </button>
-            <button id="faceBtn" class="control-btn px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-75 transition-transform duration-200">
-                😊 تشخیص چهره
-            </button>
-        </div>
-
-        <!-- Video and Canvas Container -->
-        <div class="video-container mx-auto bg-black shadow-lg">
-            <video id="video" autoplay muted playsinline></video>
-            <canvas id="canvas"></canvas>
-            <!-- Loading Indicator -->
-            <div id="loading" class="absolute inset-0 bg-black bg-opacity-75 flex flex-col items-center justify-center text-white z-20">
-                <svg class="animate-spin h-10 w-10 text-white mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+    <!-- Header -->
+    <header class="fixed top-0 left-0 right-0 z-50 glass-effect">
+        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <h1 class="text-2xl font-bold text-white">SecureNet <span class="text-blue-400">VPN</span></h1>
+            <nav class="hidden md:flex items-center space-x-8 space-x-reverse">
+                <a href="#features" class="hover:text-blue-400 transition">ویژگی‌ها</a>
+                <a href="#servers" class="hover:text-blue-400 transition">سرورها</a>
+                <a href="#pricing" class="hover:text-blue-400 transition">قیمت‌ها</a>
+                <a href="#faq" class="hover:text-blue-400 transition">پرسش‌های متداول</a>
+            </nav>
+            <button class="hidden md:block bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-lg transition">ورود کاربران</button>
+            <button class="md:hidden text-white">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
                 </svg>
-                <p id="loading-text" class="text-lg">در حال آماده‌سازی دوربین...</p>
-            </div>
+            </button>
         </div>
-    </div>
+    </header>
+
+    <main>
+        <!-- Hero Section -->
+        <section class="min-h-screen flex items-center justify-center text-center pt-20 relative overflow-hidden">
+            <div class="absolute inset-0 bg-grid-pattern opacity-10"></div>
+            <div class="container mx-auto px-6 z-10">
+                <h2 class="text-4xl md:text-6xl font-bold text-white leading-tight">
+                    اینترنت آزاد و امن،<br>تنها با یک کلیک
+                </h2>
+                <p class="mt-4 text-lg md:text-xl text-gray-400 max-w-2xl mx-auto">
+                    با SecureNet VPN هویت خود را مخفی نگه دارید، به تمام محتوای جهان دسترسی پیدا کنید و از بالاترین سرعت لذت ببرید.
+                </p>
+                <div class="mt-8">
+                    <a href="#pricing" class="btn-primary text-white font-bold text-lg py-4 px-8 rounded-full inline-block">
+                        دریافت سرویس
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Features Section -->
+        <section id="features" class="py-20">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-12">
+                    <h3 class="text-3xl md:text-4xl font-bold text-white">چرا SecureNet VPN؟</h3>
+                    <p class="text-gray-400 mt-2">ما بهترین ویژگی‌ها را برای یک تجربه بی‌نقص فراهم کرده‌ایم.</p>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <!-- Feature Item 1 -->
+                    <div class="glass-effect p-8 rounded-xl text-center">
+                        <div class="flex justify-center mb-4">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#00c6ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                        </div>
+                        <h4 class="text-xl font-bold text-white mb-2">امنیت فوق‌العاده</h4>
+                        <p class="text-gray-400">با رمزنگاری پیشرفته AES-256، اطلاعات شما همیشه در امان است.</p>
+                    </div>
+                    <!-- Feature Item 2 -->
+                    <div class="glass-effect p-8 rounded-xl text-center">
+                        <div class="flex justify-center mb-4">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#00c6ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path><polyline points="13 2 13 9 20 9"></polyline></svg>
+                        </div>
+                        <h4 class="text-xl font-bold text-white mb-2">بدون ثبت لاگ</h4>
+                        <p class="text-gray-400">ما به حریم خصوصی شما احترام می‌گذاریم و هیچ فعالیتی را ذخیره نمی‌کنیم.</p>
+                    </div>
+                    <!-- Feature Item 3 -->
+                    <div class="glass-effect p-8 rounded-xl text-center">
+                        <div class="flex justify-center mb-4">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#00c6ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"></path></svg>
+                        </div>
+                        <h4 class="text-xl font-bold text-white mb-2">سرعت بی‌نظیر</h4>
+                        <p class="text-gray-400">سرورهای بهینه ما در سراسر جهان، بالاترین سرعت ممکن را تضمین می‌کنند.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Servers Section -->
+        <section id="servers" class="py-20">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-12">
+                    <h3 class="text-3xl md:text-4xl font-bold text-white">شبکه جهانی سرورها</h3>
+                    <p class="text-gray-400 mt-2">به بیش از ۵۰ کشور متصل شوید. (روی نقاط نقشه هاور کنید)</p>
+                </div>
+                <div id="world-map-container" class="w-full max-w-4xl mx-auto">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/8/80/World_map_-_low_resolution.svg" alt="نقشه جهان" class="w-full h-auto opacity-20"/>
+                    <!-- Server points will be injected here by JS -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Pricing Section -->
+        <section id="pricing" class="py-20">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-12">
+                    <h3 class="text-3xl md:text-4xl font-bold text-white">پلن‌های ما</h3>
+                    <p class="text-gray-400 mt-2">بهترین پلن را متناسب با نیاز خود انتخاب کنید.</p>
+                </div>
+
+                <!-- Pricing Toggle -->
+                <div class="flex justify-center items-center mb-10">
+                    <span class="text-white font-medium">ماهانه</span>
+                    <div id="pricing-toggle" class="relative inline-block w-14 mx-4 align-middle select-none transition duration-200 ease-in cursor-pointer">
+                        <div class="pricing-toggle-bg w-14 h-8 rounded-full"></div>
+                        <div id="pricing-toggle-button" class="pricing-toggle-btn absolute top-1 right-1 w-6 h-6 rounded-full shadow"></div>
+                    </div>
+                    <span class="text-white font-medium">سالانه <span class="text-green-400">(۳۰٪ تخفیف)</span></span>
+                </div>
+
+                <!-- Pricing Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+                    <!-- Plan 1: Basic -->
+                    <div class="glass-effect p-8 rounded-xl border-2 border-transparent flex flex-col">
+                        <h4 class="text-2xl font-bold text-white">پایه</h4>
+                        <p class="text-gray-400 mt-2">برای شروع</p>
+                        <div class="my-6">
+                            <span class="text-5xl font-bold text-white" data-price-monthly="150" data-price-yearly="105">۱۵۰</span>
+                            <span class="text-gray-400">هزار تومان / ماه</span>
+                        </div>
+                        <ul class="space-y-4 text-right flex-grow">
+                            <li class="flex items-center"><svg class="w-5 h-5 text-green-500 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>۱۰ گیگابایت ترافیک</li>
+                            <li class="flex items-center"><svg class="w-5 h-5 text-green-500 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>اتصال ۲ کاربر همزمان</li>
+                            <li class="flex items-center"><svg class="w-5 h-5 text-green-500 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>پشتیبانی استاندارد</li>
+                        </ul>
+                        <button class="mt-8 w-full bg-gray-700 hover:bg-gray-600 text-white font-bold py-3 px-4 rounded-lg transition">انتخاب پلن</button>
+                    </div>
+
+                    <!-- Plan 2: Pro (Recommended) -->
+                    <div class="glass-effect p-8 rounded-xl border-2 border-blue-500 flex flex-col relative">
+                        <span class="absolute top-0 right-1/2 transform translate-x-1/2 -translate-y-1/2 bg-blue-500 text-white text-sm font-bold px-4 py-1 rounded-full">پیشنهادی</span>
+                        <h4 class="text-2xl font-bold text-white">حرفه‌ای</h4>
+                        <p class="text-gray-400 mt-2">بهترین انتخاب</p>
+                        <div class="my-6">
+                            <span class="text-5xl font-bold text-white" data-price-monthly="250" data-price-yearly="175">۲۵۰</span>
+                            <span class="text-gray-400">هزار تومان / ماه</span>
+                        </div>
+                        <ul class="space-y-4 text-right flex-grow">
+                            <li class="flex items-center"><svg class="w-5 h-5 text-green-500 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>ترافیک نامحدود</li>
+                            <li class="flex items-center"><svg class="w-5 h-5 text-green-500 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>اتصال ۵ کاربر همزمان</li>
+                            <li class="flex items-center"><svg class="w-5 h-5 text-green-500 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>پشتیبانی ویژه</li>
+                        </ul>
+                        <button class="mt-8 w-full btn-primary text-white font-bold py-3 px-4 rounded-lg">انتخاب پلن</button>
+                    </div>
+
+                    <!-- Plan 3: Business -->
+                    <div class="glass-effect p-8 rounded-xl border-2 border-transparent flex flex-col">
+                        <h4 class="text-2xl font-bold text-white">تجاری</h4>
+                        <p class="text-gray-400 mt-2">برای تیم‌ها</p>
+                        <div class="my-6">
+                            <span class="text-5xl font-bold text-white" data-price-monthly="500" data-price-yearly="350">۵۰۰</span>
+                            <span class="text-gray-400">هزار تومان / ماه</span>
+                        </div>
+                        <ul class="space-y-4 text-right flex-grow">
+                            <li class="flex items-center"><svg class="w-5 h-5 text-green-500 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>ترافیک نامحدود</li>
+                            <li class="flex items-center"><svg class="w-5 h-5 text-green-500 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>اتصال ۱۰ کاربر همزمان</li>
+                            <li class="flex items-center"><svg class="w-5 h-5 text-green-500 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>IP ثابت اختصاصی</li>
+                        </ul>
+                        <button class="mt-8 w-full bg-gray-700 hover:bg-gray-600 text-white font-bold py-3 px-4 rounded-lg transition">انتخاب پلن</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- FAQ Section -->
+        <section id="faq" class="py-20">
+            <div class="container mx-auto px-6 max-w-3xl">
+                <div class="text-center mb-12">
+                    <h3 class="text-3xl md:text-4xl font-bold text-white">پرسش‌های متداول</h3>
+                </div>
+                <div class="space-y-4">
+                    <!-- FAQ Item 1 -->
+                    <div class="faq-item glass-effect rounded-lg overflow-hidden">
+                        <div class="faq-item-header p-6 cursor-pointer flex justify-between items-center">
+                            <h4 class="text-lg font-semibold text-white">آیا استفاده از VPN قانونی است؟</h4>
+                            <svg class="faq-icon w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </div>
+                        <div class="faq-item-body max-h-0 overflow-hidden transition-all duration-500 ease-in-out">
+                            <p class="p-6 pt-0 text-gray-400">استفاده از VPN در بسیاری از کشورها قانونی است. با این حال، انجام فعالیت‌های غیرقانونی با استفاده از VPN همچنان غیرقانونی است. لطفاً قوانین محلی خود را بررسی کنید.</p>
+                        </div>
+                    </div>
+                    <!-- FAQ Item 2 -->
+                    <div class="faq-item glass-effect rounded-lg overflow-hidden">
+                        <div class="faq-item-header p-6 cursor-pointer flex justify-between items-center">
+                            <h4 class="text-lg font-semibold text-white">چه دستگاه‌هایی پشتیبانی می‌شوند؟</h4>
+                            <svg class="faq-icon w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </div>
+                        <div class="faq-item-body max-h-0 overflow-hidden transition-all duration-500 ease-in-out">
+                            <p class="p-6 pt-0 text-gray-400">سرویس ما بر روی ویندوز، مک، اندروید، iOS، لینوکس و حتی برخی از روترها قابل استفاده است.</p>
+                        </div>
+                    </div>
+                    <!-- FAQ Item 3 -->
+                    <div class="faq-item glass-effect rounded-lg overflow-hidden">
+                        <div class="faq-item-header p-6 cursor-pointer flex justify-between items-center">
+                            <h4 class="text-lg font-semibold text-white">آیا سرعت اینترنت من کاهش می‌یابد؟</h4>
+                            <svg class="faq-icon w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </div>
+                        <div class="faq-item-body max-h-0 overflow-hidden transition-all duration-500 ease-in-out">
+                            <p class="p-6 pt-0 text-gray-400">هرچند رمزنگاری داده‌ها ممکن است کمی بر سرعت تأثیر بگذارد، اما سرورهای بهینه ما این تأثیر را به حداقل می‌رسانند و در برخی موارد حتی ممکن است سرعت شما بهبود یابد.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-gray-800 mt-20">
+        <div class="container mx-auto px-6 py-8 text-center text-gray-500">
+            <p>&copy; 2025 SecureNet VPN. تمامی حقوق محفوظ است.</p>
+        </div>
+    </footer>
 
     <script>
-        const video = document.getElementById('video');
-        const canvas = document.getElementById('canvas');
-        const ctx = canvas.getContext('2d');
-        const loadingDiv = document.getElementById('loading');
-        const loadingText = document.getElementById('loading-text');
-        
-        const objectBtn = document.getElementById('objectBtn');
-        const handBtn = document.getElementById('handBtn');
-        const faceBtn = document.getElementById('faceBtn');
-        const controlButtons = document.querySelectorAll('.control-btn');
+        document.addEventListener('DOMContentLoaded', function() {
+            // --- Interactive Map Logic ---
+            const mapContainer = document.getElementById('world-map-container');
+            const servers = [
+                { name: 'آلمان', top: '32%', left: '48%' },
+                { name: 'آمریکا', top: '35%', left: '22%' },
+                { name: 'ژاپن', top: '38%', left: '85%' },
+                { name: 'هلند', top: '30%', left: '46%' },
+                { name: 'کانادا', top: '25%', left: '25%' },
+                { name: 'سنگاپور', top: '62%', left: '75%' },
+                { name: 'استرالیا', top: '80%', left: '85%' },
+            ];
 
-        let currentMode = null; // 'object', 'hand', 'face'
-        let objectModel = null;
-        let handModel = null;
-        
-        // --- Persian Translations for Face Expressions ---
-        const expressionTranslations = {
-            neutral: 'عادی',
-            happy: 'خوشحال',
-            sad: 'ناراحت',
-            angry: 'عصبانی',
-            fearful: 'ترسیده',
-            disgusted: 'متنفر',
-            surprised: 'متعجب'
-        };
-
-        // --- Model Loading Functions ---
-
-        async function loadObjectDetectionModel() {
-            loadingText.innerText = 'در حال بارگذاری مدل تشخیص اشیاء...';
-            if (!objectModel) {
-                objectModel = await cocoSsd.load();
-            }
-            loadingDiv.style.display = 'none';
-            currentMode = 'object';
-            updateActiveButton();
-            runDetection();
-        }
-
-        async function loadHandPoseModel() {
-            loadingText.innerText = 'در حال بارگذاری مدل تشخیص دست...';
-            if (!handModel) {
-                const model = handPoseDetection.SupportedModels.MediaPipeHands;
-                const detectorConfig = {
-                    runtime: 'mediapipe',
-                    solutionPath: 'https://cdn.jsdelivr.net/npm/@mediapipe/hands',
-                    modelType: 'full'
-                };
-                handModel = await handPoseDetection.createDetector(model, detectorConfig);
-            }
-            loadingDiv.style.display = 'none';
-            currentMode = 'hand';
-            updateActiveButton();
-            runDetection();
-        }
-
-        async function loadFaceDetectionModel() {
-            loadingText.innerText = 'در حال بارگذاری مدل‌های تشخیص چهره...';
-            // Load face-api.js models
-            await Promise.all([
-                faceapi.nets.tinyFaceDetector.loadFromUri('/models'),
-                faceapi.nets.faceLandmark68Net.loadFromUri('/models'),
-                faceapi.nets.faceRecognitionNet.loadFromUri('/models'),
-                faceapi.nets.faceExpressionNet.loadFromUri('/models')
-            ]);
-            loadingDiv.style.display = 'none';
-            currentMode = 'face';
-            updateActiveButton();
-            runDetection();
-        }
-
-        // --- Main Detection Loop ---
-        async function runDetection() {
-            if (!currentMode || video.paused || video.ended) {
-                return;
-            }
-
-            // Clear previous drawings
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-            // Run detection based on the current mode
-            if (currentMode === 'object' && objectModel) {
-                const predictions = await objectModel.detect(video);
-                drawObjectPredictions(predictions);
-            } else if (currentMode === 'hand' && handModel) {
-                const hands = await handModel.estimateHands(video);
-                drawHandPredictions(hands);
-            } else if (currentMode === 'face') {
-                const detections = await faceapi.detectAllFaces(video, new faceapi.TinyFaceDetectorOptions()).withFaceLandmarks().withFaceExpressions();
-                drawFacePredictions(detections);
-            }
-
-            // Loop
-            requestAnimationFrame(runDetection);
-        }
-        
-        // --- Drawing Functions ---
-        
-        function drawObjectPredictions(predictions) {
-            predictions.forEach(prediction => {
-                const [x, y, width, height] = prediction.bbox;
-                const text = `${prediction.class} (${Math.round(prediction.score * 100)}%)`;
-
-                // Styling
-                ctx.strokeStyle = '#00FFFF'; // Cyan
-                ctx.lineWidth = 2;
-                ctx.fillStyle = '#00FFFF';
-                ctx.font = '18px Vazirmatn';
-
-                // Draw the bounding box and text
-                ctx.beginPath();
-                ctx.rect(x, y, width, height);
-                ctx.stroke();
-                ctx.fillText(text, x, y > 10 ? y - 5 : 10);
+            servers.forEach(server => {
+                const point = document.createElement('div');
+                point.className = 'server-point';
+                point.style.top = server.top;
+                point.style.left = server.left;
+                point.title = server.name; // Simple tooltip
+                mapContainer.appendChild(point);
             });
-        }
 
-        function drawHandPredictions(hands) {
-            hands.forEach(hand => {
-                // Draw keypoints
-                ctx.fillStyle = '#FF0000'; // Red
-                for (const keypoint of hand.keypoints) {
-                    ctx.beginPath();
-                    ctx.arc(keypoint.x, keypoint.y, 5, 0, 2 * Math.PI);
-                    ctx.fill();
+            // --- Pricing Toggle Logic ---
+            const toggle = document.getElementById('pricing-toggle');
+            const toggleButton = document.getElementById('pricing-toggle-button');
+            const priceElements = document.querySelectorAll('[data-price-monthly]');
+            let isYearly = false;
+
+            toggle.addEventListener('click', () => {
+                isYearly = !isYearly;
+                if (isYearly) {
+                    toggleButton.style.transform = 'translateX(-2rem)';
+                } else {
+                    toggleButton.style.transform = 'translateX(0)';
                 }
+                updatePrices();
             });
-        }
-        
-        function drawFacePredictions(detections) {
-            const resizedDetections = faceapi.resizeResults(detections, { width: canvas.width, height: canvas.height });
 
-            resizedDetections.forEach(detection => {
-                const box = detection.detection.box;
-                const expressions = detection.expressions;
-                const maxConfidence = Math.max(...Object.values(expressions));
-                const dominantExpression = Object.keys(expressions).find(
-                    key => expressions[key] === maxConfidence
-                );
-                const translatedExpression = expressionTranslations[dominantExpression] || dominantExpression;
-                
-                const text = `${translatedExpression} (${Math.round(maxConfidence * 100)}%)`;
-
-                // Draw bounding box
-                ctx.strokeStyle = '#00FF00'; // Green
-                ctx.lineWidth = 2;
-                ctx.beginPath();
-                ctx.rect(box.x, box.y, box.width, box.height);
-                ctx.stroke();
-                
-                // Draw text
-                ctx.fillStyle = '#00FF00';
-                ctx.font = '20px Vazirmatn';
-                ctx.fillText(text, box.x, box.y > 20 ? box.y - 10 : 20);
-
-                // Draw landmarks
-                faceapi.draw.drawFaceLandmarks(canvas, resizedDetections);
-            });
-        }
-
-        // --- UI and Setup ---
-
-        function updateActiveButton() {
-            controlButtons.forEach(btn => btn.classList.remove('btn-active'));
-            if (currentMode === 'object') objectBtn.classList.add('btn-active');
-            else if (currentMode === 'hand') handBtn.classList.add('btn-active');
-            else if (currentMode === 'face') faceBtn.classList.add('btn-active');
-        }
-
-        async function setupCamera() {
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia({
-                    video: { width: 720, height: 480, facingMode: 'user' },
-                    audio: false
+            function updatePrices() {
+                priceElements.forEach(el => {
+                    const monthlyPrice = el.getAttribute('data-price-monthly');
+                    const yearlyPrice = el.getAttribute('data-price-yearly');
+                    el.textContent = isYearly ? yearlyPrice : monthlyPrice;
                 });
-                video.srcObject = stream;
-                return new Promise((resolve) => {
-                    video.onloadedmetadata = () => {
-                        resolve(video);
-                    };
-                });
-            } catch (err) {
-                loadingText.innerText = 'خطا در دسترسی به دوربین. لطفا دسترسی لازم را بدهید.';
-                console.error("Camera access error:", err);
             }
-        }
 
-        async function main() {
-            // Setup camera first
-            await setupCamera();
-            video.play();
+            // --- FAQ Accordion Logic ---
+            const faqItems = document.querySelectorAll('.faq-item');
+            faqItems.forEach(item => {
+                const header = item.querySelector('.faq-item-header');
+                const body = item.querySelector('.faq-item-body');
+                const icon = item.querySelector('.faq-icon');
 
-            // Set canvas dimensions once video is ready
-            canvas.width = video.videoWidth;
-            canvas.height = video.videoHeight;
-            
-            // Add event listeners to buttons
-            objectBtn.onclick = () => {
-                loadingDiv.style.display = 'flex';
-                loadObjectDetectionModel();
-            };
-            handBtn.onclick = () => {
-                loadingDiv.style.display = 'flex';
-                loadHandPoseModel();
-            };
-            faceBtn.onclick = () => {
-                // Face-API models need to be loaded from a specific path
-                // We create a virtual /models directory for them
-                faceapi.nets.tinyFaceDetector.loadFromUri = (uri) => faceapi.fetchNetWeights('https://cdn.jsdelivr.net/gh/justadudewhohacks/face-api.js@0.22.2/weights/tiny_face_detector_model-weights_manifest.json');
-                faceapi.nets.faceLandmark68Net.loadFromUri = (uri) => faceapi.fetchNetWeights('https://cdn.jsdelivr.net/gh/justadudewhohacks/face-api.js@0.22.2/weights/face_landmark_68_model-weights_manifest.json');
-                faceapi.nets.faceRecognitionNet.loadFromUri = (uri) => faceapi.fetchNetWeights('https://cdn.jsdelivr.net/gh/justadudewhohacks/face-api.js@0.22.2/weights/face_recognition_model-weights_manifest.json');
-                faceapi.nets.faceExpressionNet.loadFromUri = (uri) => faceapi.fetchNetWeights('https://cdn.jsdelivr.net/gh/justadudewhohacks/face-api.js@0.22.2/weights/face_expression_model-weights_manifest.json');
+                header.addEventListener('click', () => {
+                    const isOpen = body.style.maxHeight && body.style.maxHeight !== '0px';
+                    
+                    // Close all other items
+                    faqItems.forEach(otherItem => {
+                        if (otherItem !== item) {
+                            otherItem.querySelector('.faq-item-body').style.maxHeight = '0px';
+                            otherItem.querySelector('.faq-icon').style.transform = 'rotate(0deg)';
+                        }
+                    });
 
-                loadingDiv.style.display = 'flex';
-                loadFaceDetectionModel();
-            };
-
-            // Start with object detection by default
-            objectBtn.click();
-        }
-
-        // Start the application
-        main();
+                    // Open or close the clicked item
+                    if (isOpen) {
+                        body.style.maxHeight = '0px';
+                        icon.style.transform = 'rotate(0deg)';
+                    } else {
+                        body.style.maxHeight = body.scrollHeight + 'px';
+                        icon.style.transform = 'rotate(180deg)';
+                    }
+                });
+            });
+        });
     </script>
 </body>
 </html>
