@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>شبیه‌ساز هوش مصنوعی انسان‌نما ۲.۱</title>
+    <title>شبیه‌ساز هوش مصنوعی انسان‌نما ۳.۱</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -13,38 +13,21 @@
             font-family: 'Vazirmatn', sans-serif;
             background: radial-gradient(ellipse at bottom, #1b2735 0%, #090a0f 100%);
         }
-        /* انیمیشن برای درخشش و نبض */
         @keyframes pulse-glow {
-            0%, 100% {
-                box-shadow: 0 0 8px #3b82f6, 0 0 12px #3b82f6;
-                transform: scale(1);
-            }
-            50% {
-                box-shadow: 0 0 16px #60a5fa, 0 0 24px #60a5fa;
-                transform: scale(1.05);
-            }
+            0%, 100% { box-shadow: 0 0 8px #3b82f6, 0 0 12px #3b82f6; transform: scale(1); }
+            50% { box-shadow: 0 0 16px #60a5fa, 0 0 24px #60a5fa; transform: scale(1.05); }
         }
-        .pulse-glow-button {
-            animation: pulse-glow 2.5s infinite ease-in-out;
-        }
-        /* انیمیشن برای نقطه‌های در حال فکر کردن */
+        .pulse-glow-button { animation: pulse-glow 2.5s infinite ease-in-out; }
         @keyframes thinking-dots {
-            0%, 20% { content: '.'; }
-            40%, 60% { content: '..'; }
-            80%, 100% { content: '...'; }
+            0%, 20% { content: '.'; } 40%, 60% { content: '..'; } 80%, 100% { content: '...'; }
         }
-        .thinking::after {
-            content: '.';
-            animation: thinking-dots 1.5s infinite;
-            display: inline-block;
-            width: 20px;
-            text-align: left;
-        }
+        .thinking::after { content: '.'; animation: thinking-dots 1.5s infinite; display: inline-block; width: 20px; text-align: left; }
+        .toggle-checkbox:checked { right: 0; border-color: #4A5568; }
+        .toggle-checkbox:checked + .toggle-label { background-color: #2563EB; }
     </style>
 </head>
 <body class="text-gray-200 flex flex-col items-center justify-center min-h-screen p-4 overflow-hidden">
 
-    <!-- نوار اعلان -->
     <div id="notification" class="fixed top-0 left-0 right-0 bg-red-600 text-white text-center p-3 transform -translate-y-full transition-transform duration-500 z-50">
         <p id="notification-text"></p>
     </div>
@@ -52,11 +35,20 @@
     <div class="w-full max-w-6xl bg-black bg-opacity-30 backdrop-blur-sm rounded-2xl shadow-2xl border border-blue-500/30 p-4 md:p-8 space-y-6">
         <div class="text-center mb-4">
             <h1 class="text-3xl md:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500">شبیه‌ساز هوش مصنوعی انسان‌نما</h1>
-            <p class="text-gray-400 mt-2">می‌توانم محیط را ببینم یا در وب "جستجو" کنم. با من صحبت کنید.</p>
+            <p class="text-gray-400 mt-2">من یاد می‌گیرم. در حالت آنلاین اطلاعات جدید کسب می‌کنم و در حالت مستقل از حافظه‌ام استفاده می‌کنم.</p>
+        </div>
+        
+        <div class="flex items-center justify-center space-x-4 space-x-reverse">
+            <span class="text-lg">حالت مستقل (آفلاین)</span>
+            <div class="relative inline-block w-14 mr-2 align-middle select-none transition duration-200 ease-in">
+                <input type="checkbox" name="toggle" id="ai-mode-toggle" class="toggle-checkbox absolute block w-7 h-7 rounded-full bg-white border-4 appearance-none cursor-pointer"/>
+                <label for="ai-mode-toggle" class="toggle-label block overflow-hidden h-7 rounded-full bg-gray-600 cursor-pointer"></label>
+            </div>
+            <span class="text-lg font-bold text-blue-400">حالت آنلاین (یادگیری)</span>
         </div>
 
+
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <!-- ستون چپ: دوربین و کنترل‌ها -->
             <div class="flex flex-col space-y-4">
                 <div class="relative w-full aspect-video bg-black rounded-lg overflow-hidden border-2 border-blue-500/50 shadow-lg">
                     <video id="webcam" class="w-full h-full object-cover" autoplay playsinline muted></video>
@@ -76,7 +68,6 @@
                 </div>
             </div>
 
-            <!-- ستون راست: گفتگو -->
             <div class="bg-gray-800/50 p-4 rounded-lg border border-gray-700 flex flex-col space-y-4">
                 <div>
                     <h2 class="text-lg font-semibold text-blue-300 mb-2">ورودی شما (صدا):</h2>
@@ -91,6 +82,7 @@
     </div>
 
     <script>
+        // --- Elements ---
         const startButton = document.getElementById('startButton');
         const webcamVideo = document.getElementById('webcam');
         const canvas = document.getElementById('canvas');
@@ -101,18 +93,28 @@
         const loadingText = document.getElementById('loading-text');
         const notification = document.getElementById('notification');
         const notificationText = document.getElementById('notification-text');
+        const aiModeToggle = document.getElementById('ai-mode-toggle');
 
+        // --- State ---
         let isListening = false;
         let mediaStream = null;
         let recognition;
+        aiModeToggle.checked = true; // Default to online mode
+
+        // --- حافظه داخلی ربات ---
+        let knowledgeBase = [
+            { keywords: ["سلام", "درود"], response: "سلام. من یک هوش مصنوعی با قابلیت یادگیری هستم." },
+            { keywords: ["حالت چطوره", "خوبی"], response: "به عنوان یک هوش مصنوعی، من همیشه در بهترین حالت عملکردی هستم." },
+            { keywords: ["تو کی هستی", "اسمت چیه"], response: "من یک شبیه‌ساز هوش مصنوعی هستم. می‌توانید مرا یک ربات بنامید." },
+            { keywords: ["ساعت", "وقت"], response: () => `ساعت الان ${new Date().toLocaleTimeString('fa-IR')} است.` },
+            { keywords: ["تصویر", "ببین"], response: "تحلیل تصویر فقط در حالت آنلاین امکان‌پذیر است." }
+        ];
 
         function showNotification(message, isError = true) {
             notificationText.textContent = message;
             notification.className = `fixed top-0 left-0 right-0 text-white text-center p-3 transform transition-transform duration-500 z-50 ${isError ? 'bg-red-600' : 'bg-blue-600'}`;
             notification.style.transform = 'translateY(0)';
-            setTimeout(() => {
-                notification.style.transform = 'translateY(-100%)';
-            }, 4000);
+            setTimeout(() => { notification.style.transform = 'translateY(-100%)'; }, 4000);
         }
 
         try {
@@ -139,10 +141,7 @@
                      isListening = true;
                      recognition.start();
                 };
-            } catch (err) {
-                console.error("خطا در دسترسی به دوربین/میکروفون:", err);
-                showNotification('لطفاً اجازه دسترسی به دوربین و میکروفون را بدهید.');
-            }
+            } catch (err) { showNotification('لطفاً اجازه دسترسی به دوربین و میکروفون را بدهید.'); }
         }
 
         function captureFrame() {
@@ -159,65 +158,74 @@
             const transcript = event.results[0][0].transcript;
             userTextDiv.textContent = transcript;
             aiResponseDiv.textContent = '';
-            aiResponseDiv.classList.add('thinking');
-            loadingOverlay.classList.remove('hidden');
-            loadingOverlay.classList.add('flex');
-
-            const newsKeywords = ['خبر', 'اخبار', 'bbc', 'تازه ها', 'دنیا چه خبر'];
-            const isNewsQuery = newsKeywords.some(keyword => transcript.includes(keyword));
-
-            if (isNewsQuery) {
-                statusDiv.textContent = 'در حال جستجو در وب...';
-                loadingText.textContent = 'در حال جستجو در وب...';
-                callGeminiAPI(transcript, null); // عدم ارسال تصویر برای درخواست خبری
-            } else {
-                statusDiv.textContent = 'در حال تحلیل تصویر...';
-                loadingText.textContent = 'در حال تحلیل تصویر...';
+            
+            if (aiModeToggle.checked) {
+                // حالت آنلاین (یادگیری)
+                aiResponseDiv.classList.add('thinking');
+                loadingOverlay.classList.remove('hidden');
+                loadingOverlay.classList.add('flex');
+                statusDiv.textContent = 'در حال تحلیل پیشرفته...';
+                loadingText.textContent = 'در حال ارتباط با سرور...';
                 const imageBase64 = captureFrame();
                 callGeminiAPI(transcript, imageBase64);
+            } else {
+                // حالت مستقل (آفلاین)
+                statusDiv.textContent = 'پردازش از حافظه داخلی...';
+                runLocalAI(transcript);
             }
         };
 
-        recognition.onend = () => {
-            if (isListening) {
-                try { recognition.start(); } catch(e) { /* جلوگیری از خطا */ }
+        function runLocalAI(transcript) {
+            const lowerCaseTranscript = transcript.toLowerCase();
+            let foundResponse = null;
+
+            // جستجو در پایگاه دانش
+            for (const item of knowledgeBase) {
+                if (item.keywords.some(k => lowerCaseTranscript.includes(k))) {
+                    foundResponse = typeof item.response === 'function' ? item.response() : item.response;
+                    break;
+                }
             }
-        };
+            
+            const responseText = foundResponse || "این اطلاعات در حافظه من وجود ندارد. برای یادگیری این موضوع، به حالت آنلاین بروید.";
+            aiResponseDiv.textContent = responseText;
+            speak(responseText);
+        }
         
-        recognition.onerror = (event) => {
-            console.error("خطای تشخیص گفتار:", event.error);
-            if(event.error !== 'no-speech' && event.error !== 'aborted') {
-                showNotification(`خطای میکروفون: ${event.error}`);
+        // --- مکانیزم یادگیری شبیه‌سازی شده ---
+        function assimilateKnowledge(question, answer) {
+            // یک تابع ساده برای استخراج کلمات کلیدی
+            const keywords = question.split(' ').filter(word => word.length > 3 && !["درباره", "چیست", "کیست", "توضیح"].includes(word));
+            if (keywords.length === 0) return; // اگر کلمه کلیدی مناسبی پیدا نشد، یاد نگیر
+
+            // چک کن که آیا این دانش از قبل وجود دارد یا نه
+            const alreadyExists = knowledgeBase.some(item => 
+                item.keywords.some(k => keywords.includes(k))
+            );
+
+            if (!alreadyExists) {
+                knowledgeBase.push({ keywords: keywords, response: answer });
+                console.log("New knowledge assimilated:", { keywords: keywords, response: answer });
+                showNotification("اطلاعات جدید به حافظه داخلی اضافه شد!", false);
             }
-        };
+        }
+
+        recognition.onend = () => { if (isListening) { try { recognition.start(); } catch(e) {} } };
+        recognition.onerror = (event) => { if(event.error !== 'no-speech' && event.error !== 'aborted') { showNotification(`Microphone error: ${event.error}`); } };
 
         async function callGeminiAPI(text, imageBase64) {
             const apiKey = ""; 
             const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
             
-            let payload;
-            if (imageBase64) {
-                // Payload برای درخواست چندوجهی (تصویر + متن)
-                payload = {
-                    contents: [{
-                        role: "user",
-                        parts: [
-                            { text: `شما یک هوش مصنوعی انسان‌نما، هوشمند و کمی شوخ طبع هستید. به این تصویر نگاه کن و به سوال کاربر به زبان فارسی پاسخ بده. سوال: "${text}"` },
-                            { inlineData: { mimeType: "image/jpeg", data: imageBase64 } }
-                        ]
-                    }]
-                };
-            } else {
-                // Payload برای درخواست خبری (فقط متن)
-                payload = {
-                    contents: [{
-                        role: "user",
-                        parts: [
-                            { text: `شما یک هوش مصنوعی هستید که به اینترنت دسترسی دارید. به عنوان یک خبرنگار هوشمند، خلاصه‌ای از مهم‌ترین اخبار جهان در چند روز اخیر را، انگار که از منابع معتبری مانند BBC Persian خوانده‌اید، به زبان فارسی ارائه دهید. سوال کاربر این بود: "${text}"` }
-                        ]
-                    }]
-                };
-            }
+            const payload = {
+                contents: [{
+                    role: "user",
+                    parts: [
+                        { text: `You are a perceptive AI. Look at this image and answer the user's question in Persian. Be concise. User's question: "${text}"` },
+                        { inlineData: { mimeType: "image/jpeg", data: imageBase64 } }
+                    ]
+                }]
+            };
 
             try {
                 const response = await fetch(apiUrl, {
@@ -226,24 +234,21 @@
                     body: JSON.stringify(payload)
                 });
 
-                if (!response.ok) {
-                    const errorBody = await response.json();
-                    console.error('API Error Body:', errorBody);
-                    throw new Error(`خطای شبکه: ${response.status} ${response.statusText}`);
-                }
+                if (!response.ok) throw new Error(`Network error: ${response.status}`);
 
                 const result = await response.json();
-                let aiText = "متاسفانه در حال حاضر نمی‌توانم پاسخ دهم. لطفاً دوباره تلاش کنید.";
+                let aiText = "پاسخی دریافت نشد.";
                 if (result.candidates && result.candidates[0]?.content?.parts[0]?.text) {
                     aiText = result.candidates[0].content.parts[0].text;
+                    // --- یادگیری ---
+                    assimilateKnowledge(text, aiText);
                 }
                 
                 aiResponseDiv.textContent = aiText;
                 speak(aiText);
 
             } catch (error) {
-                console.error("خطا در ارتباط با Gemini API:", error);
-                aiResponseDiv.textContent = "یک مشکل در ارتباط با سرور هوش مصنوعی به وجود آمد. لطفاً اتصال اینترنت خود را بررسی کنید.";
+                aiResponseDiv.textContent = "مشکل در ارتباط با سرور هوش مصنوعی.";
                 showNotification(error.message);
             } finally {
                 statusDiv.textContent = 'آماده دریافت فرمان بعدی';
