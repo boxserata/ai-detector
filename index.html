@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تشخیص زنده با هوش مصنوعی</title>
+    <!-- Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- TensorFlow.js Core -->
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-core"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-converter"></script>
+    <!-- TensorFlow.js Backend (CPU & WebGL) -->
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-backend-cpu"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-backend-webgl"></script>
+    <!-- COCO-SSD Model for Object Detection -->
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd"></script>
+    <!-- Hand Pose Detection Model -->
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/hand-pose-detection"></script>
+    <!-- Face-API.js for Face & Expression Detection -->
+    <script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
+
+    <style>
+        /* Custom styles for the application */
+        body {
+            font-family: 'Vazirmatn', sans-serif; /* A nice Persian font */
+        }
+        @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;700&display=swap');
+        
+        /* Position the canvas directly on top of the video */
+        .video-container {
+            position: relative;
+            width: 100%;
+            max-width: 720px;
+            border-radius: 0.5rem;
+            overflow: hidden;
+        }
+        #canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+        #video {
+            display: block;
+            width: 100%;
+            height: auto;
+        }
+        /* Style for active button */
+        .btn-active {
+            background-color: #1d4ed8; /* A darker blue */
+            color: white;
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex flex-col items-center justify-center min-h-screen p-4">
+
+    <div class="w-full max-w-4xl mx-auto">
+        <header class="text-center mb-6">
+            <h1 class="text-3xl md:text-4xl font-bold text-gray-800">تشخیص زنده با هوش مصنوعی</h1>
+            <p class="text-gray-600 mt-2">بین حالت‌های مختلف جابجا شوید تا اشیاء، دست‌ها یا حالات چهره را تشخیص دهید.</p>
+        </header>
+
+        <!-- Control Buttons -->
+        <div id="controls" class="flex justify-center items-center gap-2 md:gap-4 mb-4">
+            <button id="objectBtn" class="control-btn px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-75 transition-transform duration-200">
+                🔎 تشخیص اشیاء
+            </button>
+            <button id="handBtn" class="control-btn px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-75 transition-transform duration-200">
+                🖐️ تشخیص دست
+            </button>
+            <button id="faceBtn" class="control-btn px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-75 transition-transform duration-200">
+                😊 تشخیص چهره
+            </button>
+        </div>
+
+        <!-- Video and Canvas Container -->
+        <div class="video-container mx-auto bg-black shadow-lg">
+            <video id="video" autoplay muted playsinline></video>
+            <canvas id="canvas"></canvas>
+            <!-- Loading Indicator -->
+            <div id="loading" class="absolute inset-0 bg-black bg-opacity-75 flex flex-col items-center justify-center text-white z-20">
+                <svg class="animate-spin h-10 w-10 text-white mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <p id="loading-text" class="text-lg">در حال آماده‌سازی دوربین...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const loadingDiv = document.getElementById('loading');
+        const loadingText = document.getElementById('loading-text');
+        
+        const objectBtn = document.getElementById('objectBtn');
+        const handBtn = document.getElementById('handBtn');
+        const faceBtn = document.getElementById('faceBtn');
+        const controlButtons = document.querySelectorAll('.control-btn');
+
+        let currentMode = null; // 'object', 'hand', 'face'
+        let objectModel = null;
+        let handModel = null;
+        
+        // --- Persian Translations for Face Expressions ---
+        const expressionTranslations = {
+            neutral: 'عادی',
+            happy: 'خوشحال',
+            sad: 'ناراحت',
+            angry: 'عصبانی',
+            fearful: 'ترسیده',
+            disgusted: 'متنفر',
+            surprised: 'متعجب'
+        };
+
+        // --- Model Loading Functions ---
+
+        async function loadObjectDetectionModel() {
+            loadingText.innerText = 'در حال بارگذاری مدل تشخیص اشیاء...';
+            if (!objectModel) {
+                objectModel = await cocoSsd.load();
+            }
+            loadingDiv.style.display = 'none';
+            currentMode = 'object';
+            updateActiveButton();
+            runDetection();
+        }
+
+        async function loadHandPoseModel() {
+            loadingText.innerText = 'در حال بارگذاری مدل تشخیص دست...';
+            if (!handModel) {
+                const model = handPoseDetection.SupportedModels.MediaPipeHands;
+                const detectorConfig = {
+                    runtime: 'mediapipe',
+                    solutionPath: 'https://cdn.jsdelivr.net/npm/@mediapipe/hands',
+                    modelType: 'full'
+                };
+                handModel = await handPoseDetection.createDetector(model, detectorConfig);
+            }
+            loadingDiv.style.display = 'none';
+            currentMode = 'hand';
+            updateActiveButton();
+            runDetection();
+        }
+
+        async function loadFaceDetectionModel() {
+            loadingText.innerText = 'در حال بارگذاری مدل‌های تشخیص چهره...';
+            // Load face-api.js models
+            await Promise.all([
+                faceapi.nets.tinyFaceDetector.loadFromUri('/models'),
+                faceapi.nets.faceLandmark68Net.loadFromUri('/models'),
+                faceapi.nets.faceRecognitionNet.loadFromUri('/models'),
+                faceapi.nets.faceExpressionNet.loadFromUri('/models')
+            ]);
+            loadingDiv.style.display = 'none';
+            currentMode = 'face';
+            updateActiveButton();
+            runDetection();
+        }
+
+        // --- Main Detection Loop ---
+        async function runDetection() {
+            if (!currentMode || video.paused || video.ended) {
+                return;
+            }
+
+            // Clear previous drawings
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Run detection based on the current mode
+            if (currentMode === 'object' && objectModel) {
+                const predictions = await objectModel.detect(video);
+                drawObjectPredictions(predictions);
+            } else if (currentMode === 'hand' && handModel) {
+                const hands = await handModel.estimateHands(video);
+                drawHandPredictions(hands);
+            } else if (currentMode === 'face') {
+                const detections = await faceapi.detectAllFaces(video, new faceapi.TinyFaceDetectorOptions()).withFaceLandmarks().withFaceExpressions();
+                drawFacePredictions(detections);
+            }
+
+            // Loop
+            requestAnimationFrame(runDetection);
+        }
+        
+        // --- Drawing Functions ---
+        
+        function drawObjectPredictions(predictions) {
+            predictions.forEach(prediction => {
+                const [x, y, width, height] = prediction.bbox;
+                const text = `${prediction.class} (${Math.round(prediction.score * 100)}%)`;
+
+                // Styling
+                ctx.strokeStyle = '#00FFFF'; // Cyan
+                ctx.lineWidth = 2;
+                ctx.fillStyle = '#00FFFF';
+                ctx.font = '18px Vazirmatn';
+
+                // Draw the bounding box and text
+                ctx.beginPath();
+                ctx.rect(x, y, width, height);
+                ctx.stroke();
+                ctx.fillText(text, x, y > 10 ? y - 5 : 10);
+            });
+        }
+
+        function drawHandPredictions(hands) {
+            hands.forEach(hand => {
+                // Draw keypoints
+                ctx.fillStyle = '#FF0000'; // Red
+                for (const keypoint of hand.keypoints) {
+                    ctx.beginPath();
+                    ctx.arc(keypoint.x, keypoint.y, 5, 0, 2 * Math.PI);
+                    ctx.fill();
+                }
+            });
+        }
+        
+        function drawFacePredictions(detections) {
+            const resizedDetections = faceapi.resizeResults(detections, { width: canvas.width, height: canvas.height });
+
+            resizedDetections.forEach(detection => {
+                const box = detection.detection.box;
+                const expressions = detection.expressions;
+                const maxConfidence = Math.max(...Object.values(expressions));
+                const dominantExpression = Object.keys(expressions).find(
+                    key => expressions[key] === maxConfidence
+                );
+                const translatedExpression = expressionTranslations[dominantExpression] || dominantExpression;
+                
+                const text = `${translatedExpression} (${Math.round(maxConfidence * 100)}%)`;
+
+                // Draw bounding box
+                ctx.strokeStyle = '#00FF00'; // Green
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.rect(box.x, box.y, box.width, box.height);
+                ctx.stroke();
+                
+                // Draw text
+                ctx.fillStyle = '#00FF00';
+                ctx.font = '20px Vazirmatn';
+                ctx.fillText(text, box.x, box.y > 20 ? box.y - 10 : 20);
+
+                // Draw landmarks
+                faceapi.draw.drawFaceLandmarks(canvas, resizedDetections);
+            });
+        }
+
+        // --- UI and Setup ---
+
+        function updateActiveButton() {
+            controlButtons.forEach(btn => btn.classList.remove('btn-active'));
+            if (currentMode === 'object') objectBtn.classList.add('btn-active');
+            else if (currentMode === 'hand') handBtn.classList.add('btn-active');
+            else if (currentMode === 'face') faceBtn.classList.add('btn-active');
+        }
+
+        async function setupCamera() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    video: { width: 720, height: 480, facingMode: 'user' },
+                    audio: false
+                });
+                video.srcObject = stream;
+                return new Promise((resolve) => {
+                    video.onloadedmetadata = () => {
+                        resolve(video);
+                    };
+                });
+            } catch (err) {
+                loadingText.innerText = 'خطا در دسترسی به دوربین. لطفا دسترسی لازم را بدهید.';
+                console.error("Camera access error:", err);
+            }
+        }
+
+        async function main() {
+            // Setup camera first
+            await setupCamera();
+            video.play();
+
+            // Set canvas dimensions once video is ready
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            
+            // Add event listeners to buttons
+            objectBtn.onclick = () => {
+                loadingDiv.style.display = 'flex';
+                loadObjectDetectionModel();
+            };
+            handBtn.onclick = () => {
+                loadingDiv.style.display = 'flex';
+                loadHandPoseModel();
+            };
+            faceBtn.onclick = () => {
+                // Face-API models need to be loaded from a specific path
+                // We create a virtual /models directory for them
+                faceapi.nets.tinyFaceDetector.loadFromUri = (uri) => faceapi.fetchNetWeights('https://cdn.jsdelivr.net/gh/justadudewhohacks/face-api.js@0.22.2/weights/tiny_face_detector_model-weights_manifest.json');
+                faceapi.nets.faceLandmark68Net.loadFromUri = (uri) => faceapi.fetchNetWeights('https://cdn.jsdelivr.net/gh/justadudewhohacks/face-api.js@0.22.2/weights/face_landmark_68_model-weights_manifest.json');
+                faceapi.nets.faceRecognitionNet.loadFromUri = (uri) => faceapi.fetchNetWeights('https://cdn.jsdelivr.net/gh/justadudewhohacks/face-api.js@0.22.2/weights/face_recognition_model-weights_manifest.json');
+                faceapi.nets.faceExpressionNet.loadFromUri = (uri) => faceapi.fetchNetWeights('https://cdn.jsdelivr.net/gh/justadudewhohacks/face-api.js@0.22.2/weights/face_expression_model-weights_manifest.json');
+
+                loadingDiv.style.display = 'flex';
+                loadFaceDetectionModel();
+            };
+
+            // Start with object detection by default
+            objectBtn.click();
+        }
+
+        // Start the application
+        main();
+    </script>
+</body>
+</html>
