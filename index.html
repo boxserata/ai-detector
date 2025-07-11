@@ -18,6 +18,7 @@
             font-family: 'Vazirmatn', sans-serif;
             background-color: #0d1117;
             color: #c9d1d9;
+            scroll-behavior: smooth;
         }
         .glass-effect {
             background: rgba(22, 27, 34, 0.6);
@@ -38,9 +39,9 @@
         .pricing-toggle-btn { background-color: #0072ff; transition: transform 0.3s ease; }
         #world-map-container { position: relative; overflow: hidden; }
         .server-point { position: absolute; width: 12px; height: 12px; background-color: #00c6ff; border-radius: 50%; cursor: pointer; transition: transform 0.2s ease; }
-        .server-point::before { content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 24px; height: 24px; border-radius: 50%; background-color: rgba(0, 198, 255, 0.3); animation: pulse 2s infinite; }
+        .server-point::before { content: ''; position: absolute; top: 50%; left: 50%; width: 24px; height: 24px; border-radius: 50%; background-color: rgba(0, 198, 255, 0.3); animation: pulse 2s infinite; }
         .server-point:hover { transform: scale(1.5); }
-        @keyframes pulse { 0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0.7; } 70% { transform: translate(-50%, -50%) scale(1.5); opacity: 0; } 100% { transform: translate(-50%, -50%) scale(0.5); opacity: 0; } }
+        @keyframes pulse { 0% { transform: scale(0.5); opacity: 0.7; } 70% { transform: scale(1.5); opacity: 0; } 100% { transform: scale(0.5); opacity: 0; } }
         .faq-item-header { transition: background-color 0.3s; }
         .faq-item-header:hover { background-color: #1c222b; }
         .faq-icon { transition: transform 0.3s; }
@@ -70,19 +71,128 @@
         </header>
 
         <main>
-            <!-- Sections: Hero, Features, Servers, Pricing, FAQ -->
-            <!-- (All sections from the previous version are here, kept for brevity) -->
+            <!-- Hero Section -->
             <section class="min-h-screen flex items-center justify-center text-center pt-20 relative overflow-hidden">
+                <div class="absolute inset-0 bg-grid-pattern opacity-10"></div>
                 <div class="container mx-auto px-6 z-10">
-                    <h2 class="text-4xl md:text-6xl font-bold text-white leading-tight">اینترنت آزاد و امن،<br>تنها با یک کلیک</h2>
-                    <p class="mt-4 text-lg md:text-xl text-gray-400 max-w-2xl mx-auto">با SecureNet VPN هویت خود را مخفی نگه دارید، به تمام محتوای جهان دسترسی پیدا کنید و از بالاترین سرعت لذت ببرید.</p>
-                    <div class="mt-8"><a href="#pricing" class="btn-primary text-white font-bold text-lg py-4 px-8 rounded-full inline-block">دریافت سرویس</a></div>
+                    <h2 class="text-4xl md:text-6xl font-bold text-white leading-tight">
+                        اینترنت آزاد و امن،<br>تنها با یک کلیک
+                    </h2>
+                    <p class="mt-4 text-lg md:text-xl text-gray-400 max-w-2xl mx-auto">
+                        با SecureNet VPN هویت خود را مخفی نگه دارید، به تمام محتوای جهان دسترسی پیدا کنید و از بالاترین سرعت لذت ببرید.
+                    </p>
+                    <div class="mt-8">
+                        <a href="#pricing" class="btn-primary text-white font-bold text-lg py-4 px-8 rounded-full inline-block">
+                            دریافت سرویس
+                        </a>
+                    </div>
                 </div>
             </section>
-            <section id="features" class="py-20"> {/* Features Section */} </section>
-            <section id="servers" class="py-20"> {/* Servers Section */} </section>
-            <section id="pricing" class="py-20"> {/* Pricing Section */} </section>
-            <section id="faq" class="py-20"> {/* FAQ Section */} </section>
+
+            <!-- Features Section -->
+            <section id="features" class="py-20">
+                <div class="container mx-auto px-6">
+                    <div class="text-center mb-12">
+                        <h3 class="text-3xl md:text-4xl font-bold text-white">چرا SecureNet VPN؟</h3>
+                        <p class="text-gray-400 mt-2">ما بهترین ویژگی‌ها را برای یک تجربه بی‌نقص فراهم کرده‌ایم.</p>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                        <div class="glass-effect p-8 rounded-xl text-center">
+                            <div class="flex justify-center mb-4"><svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#00c6ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg></div>
+                            <h4 class="text-xl font-bold text-white mb-2">امنیت فوق‌العاده</h4>
+                            <p class="text-gray-400">با رمزنگاری پیشرفته AES-256، اطلاعات شما همیشه در امان است.</p>
+                        </div>
+                        <div class="glass-effect p-8 rounded-xl text-center">
+                            <div class="flex justify-center mb-4"><svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#00c6ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path><polyline points="13 2 13 9 20 9"></polyline></svg></div>
+                            <h4 class="text-xl font-bold text-white mb-2">بدون ثبت لاگ</h4>
+                            <p class="text-gray-400">ما به حریم خصوصی شما احترام می‌گذاریم و هیچ فعالیتی را ذخیره نمی‌کنیم.</p>
+                        </div>
+                        <div class="glass-effect p-8 rounded-xl text-center">
+                            <div class="flex justify-center mb-4"><svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#00c6ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"></path></svg></div>
+                            <h4 class="text-xl font-bold text-white mb-2">سرعت بی‌نظیر</h4>
+                            <p class="text-gray-400">سرورهای بهینه ما در سراسر جهان، بالاترین سرعت ممکن را تضمین می‌کنند.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Servers Section -->
+            <section id="servers" class="py-20">
+                <div class="container mx-auto px-6">
+                    <div class="text-center mb-12">
+                        <h3 class="text-3xl md:text-4xl font-bold text-white">شبکه جهانی سرورها</h3>
+                        <p class="text-gray-400 mt-2">به بیش از ۵۰ کشور متصل شوید. (روی نقاط نقشه هاور کنید)</p>
+                    </div>
+                    <div id="world-map-container" class="w-full max-w-4xl mx-auto">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/8/80/World_map_-_low_resolution.svg" alt="نقشه جهان" class="w-full h-auto opacity-20"/>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Pricing Section -->
+            <section id="pricing" class="py-20">
+                <div class="container mx-auto px-6">
+                    <div class="text-center mb-12">
+                        <h3 class="text-3xl md:text-4xl font-bold text-white">پلن‌های ما</h3>
+                        <p class="text-gray-400 mt-2">بهترین پلن را متناسب با نیاز خود انتخاب کنید.</p>
+                    </div>
+                    <div class="flex justify-center items-center mb-10">
+                        <span class="text-white font-medium">ماهانه</span>
+                        <div id="pricing-toggle" class="relative inline-block w-14 mx-4 align-middle select-none transition duration-200 ease-in cursor-pointer">
+                            <div class="pricing-toggle-bg w-14 h-8 rounded-full"></div>
+                            <div id="pricing-toggle-button" class="pricing-toggle-btn absolute top-1 right-1 w-6 h-6 rounded-full shadow"></div>
+                        </div>
+                        <span class="text-white font-medium">سالانه <span class="text-green-400">(۳۰٪ تخفیف)</span></span>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+                        <div class="glass-effect p-8 rounded-xl border-2 border-transparent flex flex-col">
+                            <h4 class="text-2xl font-bold text-white">پایه</h4>
+                            <p class="text-gray-400 mt-2">برای شروع</p>
+                            <div class="my-6"><span class="text-5xl font-bold text-white" data-price-monthly="150" data-price-yearly="105">۱۵۰</span><span class="text-gray-400"> هزار تومان / ماه</span></div>
+                            <ul class="space-y-4 text-right flex-grow"><li class="flex items-center"><svg class="w-5 h-5 text-green-500 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>۱۰ گیگابایت ترافیک</li><li class="flex items-center"><svg class="w-5 h-5 text-green-500 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>اتصال ۲ کاربر همزمان</li><li class="flex items-center"><svg class="w-5 h-5 text-green-500 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>پشتیبانی استاندارد</li></ul>
+                            <button class="mt-8 w-full bg-gray-700 hover:bg-gray-600 text-white font-bold py-3 px-4 rounded-lg transition">انتخاب پلن</button>
+                        </div>
+                        <div class="glass-effect p-8 rounded-xl border-2 border-blue-500 flex flex-col relative">
+                            <span class="absolute top-0 right-1/2 transform translate-x-1/2 -translate-y-1/2 bg-blue-500 text-white text-sm font-bold px-4 py-1 rounded-full">پیشنهادی</span>
+                            <h4 class="text-2xl font-bold text-white">حرفه‌ای</h4>
+                            <p class="text-gray-400 mt-2">بهترین انتخاب</p>
+                            <div class="my-6"><span class="text-5xl font-bold text-white" data-price-monthly="250" data-price-yearly="175">۲۵۰</span><span class="text-gray-400"> هزار تومان / ماه</span></div>
+                            <ul class="space-y-4 text-right flex-grow"><li class="flex items-center"><svg class="w-5 h-5 text-green-500 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>ترافیک نامحدود</li><li class="flex items-center"><svg class="w-5 h-5 text-green-500 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>اتصال ۵ کاربر همزمان</li><li class="flex items-center"><svg class="w-5 h-5 text-green-500 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>پشتیبانی ویژه</li></ul>
+                            <button class="mt-8 w-full btn-primary text-white font-bold py-3 px-4 rounded-lg">انتخاب پلن</button>
+                        </div>
+                        <div class="glass-effect p-8 rounded-xl border-2 border-transparent flex flex-col">
+                            <h4 class="text-2xl font-bold text-white">تجاری</h4>
+                            <p class="text-gray-400 mt-2">برای تیم‌ها</p>
+                            <div class="my-6"><span class="text-5xl font-bold text-white" data-price-monthly="500" data-price-yearly="350">۵۰۰</span><span class="text-gray-400"> هزار تومان / ماه</span></div>
+                            <ul class="space-y-4 text-right flex-grow"><li class="flex items-center"><svg class="w-5 h-5 text-green-500 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>ترافیک نامحدود</li><li class="flex items-center"><svg class="w-5 h-5 text-green-500 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>اتصال ۱۰ کاربر همزمان</li><li class="flex items-center"><svg class="w-5 h-5 text-green-500 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>IP ثابت اختصاصی</li></ul>
+                            <button class="mt-8 w-full bg-gray-700 hover:bg-gray-600 text-white font-bold py-3 px-4 rounded-lg transition">انتخاب پلن</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- FAQ Section -->
+            <section id="faq" class="py-20">
+                <div class="container mx-auto px-6 max-w-3xl">
+                    <div class="text-center mb-12">
+                        <h3 class="text-3xl md:text-4xl font-bold text-white">پرسش‌های متداول</h3>
+                    </div>
+                    <div class="space-y-4">
+                        <div class="faq-item glass-effect rounded-lg overflow-hidden">
+                            <div class="faq-item-header p-6 cursor-pointer flex justify-between items-center"><h4 class="text-lg font-semibold text-white">آیا استفاده از VPN قانونی است؟</h4><svg class="faq-icon w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg></div>
+                            <div class="faq-item-body max-h-0 overflow-hidden transition-all duration-500 ease-in-out"><p class="p-6 pt-0 text-gray-400">استفاده از VPN در بسیاری از کشورها قانونی است. با این حال، انجام فعالیت‌های غیرقانونی با استفاده از VPN همچنان غیرقانونی است. لطفاً قوانین محلی خود را بررسی کنید.</p></div>
+                        </div>
+                        <div class="faq-item glass-effect rounded-lg overflow-hidden">
+                            <div class="faq-item-header p-6 cursor-pointer flex justify-between items-center"><h4 class="text-lg font-semibold text-white">چه دستگاه‌هایی پشتیبانی می‌شوند؟</h4><svg class="faq-icon w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg></div>
+                            <div class="faq-item-body max-h-0 overflow-hidden transition-all duration-500 ease-in-out"><p class="p-6 pt-0 text-gray-400">سرویس ما بر روی ویندوز، مک، اندروید، iOS، لینوکس و حتی برخی از روترها قابل استفاده است.</p></div>
+                        </div>
+                        <div class="faq-item glass-effect rounded-lg overflow-hidden">
+                            <div class="faq-item-header p-6 cursor-pointer flex justify-between items-center"><h4 class="text-lg font-semibold text-white">آیا سرعت اینترنت من کاهش می‌یابد؟</h4><svg class="faq-icon w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg></div>
+                            <div class="faq-item-body max-h-0 overflow-hidden transition-all duration-500 ease-in-out"><p class="p-6 pt-0 text-gray-400">هرچند رمزنگاری داده‌ها ممکن است کمی بر سرعت تأثیر بگذارد، اما سرورهای بهینه ما این تأثیر را به حداقل می‌رسانند و در برخی موارد حتی ممکن است سرعت شما بهبود یابد.</p></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
         </main>
 
         <!-- Footer -->
@@ -98,7 +208,6 @@
         <div class="w-full max-w-2xl text-center">
             <h2 class="text-3xl md:text-4xl font-bold text-white">داشبورد کاربری</h2>
             <p id="welcome-message" class="text-lg text-gray-400 mt-2 mb-8">خوش آمدید!</p>
-
             <div class="glass-effect p-6 md:p-8 rounded-xl">
                 <h3 class="text-xl font-bold text-white mb-4">سرویس فعال شما</h3>
                 <p class="text-gray-400 mb-2">این لینک کانفیگ شماست. آن را در اپلیکیشن خود وارد کنید.</p>
@@ -110,7 +219,6 @@
                 </div>
                 <p id="copy-feedback" class="text-green-500 mt-2 h-5 transition-opacity opacity-0">کپی شد!</p>
             </div>
-
             <button id="logout-btn" class="mt-8 bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-6 rounded-lg transition">خروج از حساب</button>
         </div>
     </div>
@@ -118,7 +226,6 @@
     <!-- Auth Modal (Login/Register) -->
     <div id="auth-modal" class="modal-backdrop fixed inset-0 z-50 bg-black bg-opacity-70 flex items-center justify-center p-4 hidden opacity-0">
         <div class="modal-content glass-effect rounded-2xl w-full max-w-md p-8 transform scale-95 opacity-0">
-            <!-- Login Form -->
             <form id="login-form">
                 <h3 class="text-2xl font-bold text-white text-center mb-6">ورود به حساب کاربری</h3>
                 <div class="space-y-4">
@@ -127,12 +234,8 @@
                 </div>
                 <p id="login-error" class="text-red-500 text-sm text-center h-5 mt-4"></p>
                 <button type="submit" class="w-full mt-4 btn-primary text-white font-bold py-3 rounded-lg">ورود</button>
-                <p class="text-center mt-4 text-gray-400">
-                    حساب کاربری ندارید؟ <a href="#" id="show-register-form" class="text-blue-400 hover:underline">ثبت‌نام کنید</a>
-                </p>
+                <p class="text-center mt-4 text-gray-400">حساب کاربری ندارید؟ <a href="#" id="show-register-form" class="text-blue-400 hover:underline">ثبت‌نام کنید</a></p>
             </form>
-
-            <!-- Register Form (Initially Hidden) -->
             <form id="register-form" class="hidden">
                 <h3 class="text-2xl font-bold text-white text-center mb-6">ایجاد حساب کاربری جدید</h3>
                 <div class="space-y-4">
@@ -141,39 +244,82 @@
                 </div>
                  <p id="register-error" class="text-red-500 text-sm text-center h-5 mt-4"></p>
                 <button type="submit" class="w-full mt-4 btn-primary text-white font-bold py-3 rounded-lg">ثبت‌نام</button>
-                <p class="text-center mt-4 text-gray-400">
-                    قبلاً ثبت‌نام کرده‌اید؟ <a href="#" id="show-login-form" class="text-blue-400 hover:underline">وارد شوید</a>
-                </p>
+                <p class="text-center mt-4 text-gray-400">قبلاً ثبت‌نام کرده‌اید؟ <a href="#" id="show-login-form" class="text-blue-400 hover:underline">وارد شوید</a></p>
             </form>
         </div>
     </div>
 
-
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // --- DOM Elements ---
+            // --- Interactive Map Logic ---
+            const mapContainer = document.getElementById('world-map-container');
+            if (mapContainer) {
+                const servers = [ { name: 'آلمان', top: '32%', left: '48%' }, { name: 'آمریکا', top: '35%', left: '22%' }, { name: 'ژاپن', top: '38%', left: '85%' }, { name: 'هلند', top: '30%', left: '46%' }, { name: 'کانادا', top: '25%', left: '25%' }, { name: 'سنگاپور', top: '62%', left: '75%' }, { name: 'استرالیا', top: '80%', left: '85%' }, ];
+                servers.forEach(server => {
+                    const point = document.createElement('div');
+                    point.className = 'server-point';
+                    point.style.top = server.top;
+                    point.style.left = server.left;
+                    point.title = server.name;
+                    mapContainer.appendChild(point);
+                });
+            }
+
+            // --- Pricing Toggle Logic ---
+            const toggle = document.getElementById('pricing-toggle');
+            if (toggle) {
+                const toggleButton = document.getElementById('pricing-toggle-button');
+                const priceElements = document.querySelectorAll('[data-price-monthly]');
+                let isYearly = false;
+                toggle.addEventListener('click', () => {
+                    isYearly = !isYearly;
+                    toggleButton.style.transform = isYearly ? 'translateX(-2rem)' : 'translateX(0)';
+                    priceElements.forEach(el => {
+                        el.textContent = isYearly ? el.getAttribute('data-price-yearly') : el.getAttribute('data-price-monthly');
+                    });
+                });
+            }
+
+            // --- FAQ Accordion Logic ---
+            const faqItems = document.querySelectorAll('.faq-item');
+            faqItems.forEach(item => {
+                const header = item.querySelector('.faq-item-header');
+                header.addEventListener('click', () => {
+                    const body = item.querySelector('.faq-item-body');
+                    const icon = item.querySelector('.faq-icon');
+                    const isOpen = body.style.maxHeight && body.style.maxHeight !== '0px';
+                    faqItems.forEach(other => {
+                        other.querySelector('.faq-item-body').style.maxHeight = '0px';
+                        other.querySelector('.faq-icon').style.transform = 'rotate(0deg)';
+                    });
+                    if (!isOpen) {
+                        body.style.maxHeight = body.scrollHeight + 'px';
+                        icon.style.transform = 'rotate(180deg)';
+                    }
+                });
+            });
+
+            // --- Auth System (Modal, Forms, localStorage) ---
             const mainContent = document.getElementById('main-content');
             const dashboard = document.getElementById('dashboard');
             const authModal = document.getElementById('auth-modal');
             const modalContent = authModal.querySelector('.modal-content');
-
             const loginModalBtn = document.getElementById('login-modal-btn');
             const logoutBtn = document.getElementById('logout-btn');
-            
             const loginForm = document.getElementById('login-form');
             const registerForm = document.getElementById('register-form');
             const showRegisterLink = document.getElementById('show-register-form');
             const showLoginLink = document.getElementById('show-login-form');
-
             const loginError = document.getElementById('login-error');
             const registerError = document.getElementById('register-error');
-            
             const welcomeMessage = document.getElementById('welcome-message');
             const configLinkEl = document.getElementById('config-link');
             const copyBtn = document.getElementById('copy-btn');
             const copyFeedback = document.getElementById('copy-feedback');
 
-            // --- Modal Logic ---
+            const DB_USERS_KEY = 'vpn_users';
+            const SESSION_KEY = 'vpn_session';
+
             function openModal() {
                 authModal.classList.remove('hidden');
                 setTimeout(() => {
@@ -193,67 +339,38 @@
             }
 
             loginModalBtn.addEventListener('click', openModal);
-            authModal.addEventListener('click', (e) => {
-                if (e.target === authModal) closeModal();
-            });
+            authModal.addEventListener('click', (e) => { if (e.target === authModal) closeModal(); });
+            showRegisterLink.addEventListener('click', (e) => { e.preventDefault(); loginForm.classList.add('hidden'); registerForm.classList.remove('hidden'); });
+            showLoginLink.addEventListener('click', (e) => { e.preventDefault(); registerForm.classList.add('hidden'); loginForm.classList.remove('hidden'); });
 
-            showRegisterLink.addEventListener('click', (e) => {
-                e.preventDefault();
-                loginForm.classList.add('hidden');
-                registerForm.classList.remove('hidden');
-            });
+            function getUsers() { return JSON.parse(localStorage.getItem(DB_USERS_KEY)) || []; }
+            function saveUsers(users) { localStorage.setItem(DB_USERS_KEY, JSON.stringify(users)); }
 
-            showLoginLink.addEventListener('click', (e) => {
-                e.preventDefault();
-                registerForm.classList.add('hidden');
-                loginForm.classList.remove('hidden');
-            });
-
-            // --- Authentication Logic (using localStorage) ---
-            const DB_USERS_KEY = 'vpn_users';
-            const SESSION_KEY = 'vpn_session';
-
-            // Function to get users from localStorage
-            function getUsers() {
-                return JSON.parse(localStorage.getItem(DB_USERS_KEY)) || [];
-            }
-
-            // Function to save users to localStorage
-            function saveUsers(users) {
-                localStorage.setItem(DB_USERS_KEY, JSON.stringify(users));
-            }
-
-            // Handle Registration
             registerForm.addEventListener('submit', (e) => {
                 e.preventDefault();
-                const username = document.getElementById('register-username').value;
+                const username = document.getElementById('register-username').value.trim();
                 const password = document.getElementById('register-password').value;
+                if (!username || !password) {
+                    registerError.textContent = 'نام کاربری و رمز عبور نمی‌توانند خالی باشند.';
+                    return;
+                }
                 const users = getUsers();
-
-                if (users.find(u => u.username === username)) {
+                if (users.find(u => u.username.toLowerCase() === username.toLowerCase())) {
                     registerError.textContent = 'این نام کاربری قبلا استفاده شده است.';
                     return;
                 }
-                
-                // For a real app, config would come from a backend. Here we use the example.
                 const newConfig = `vless://03765909-a1cf-4700-a942-0bc7b384665b@yasdl.kozow.com:80?encryption=none&security=none&type=xhttp&host=boxser1your-name.global.ssl.fastly.net&path=%2F&mode=auto#${username}`;
-                
                 users.push({ username, password, config: newConfig });
                 saveUsers(users);
-                
-                // Automatically log in after registration
                 loginUser(username);
             });
 
-            // Handle Login
             loginForm.addEventListener('submit', (e) => {
                 e.preventDefault();
                 const username = document.getElementById('login-username').value;
                 const password = document.getElementById('login-password').value;
                 const users = getUsers();
-                
                 const user = users.find(u => u.username === username && u.password === password);
-
                 if (user) {
                     loginUser(username);
                 } else {
@@ -261,7 +378,6 @@
                 }
             });
             
-            // Handle Logout
             logoutBtn.addEventListener('click', () => {
                 localStorage.removeItem(SESSION_KEY);
                 showMainPage();
@@ -273,39 +389,29 @@
                 showDashboard();
             }
 
-            // --- UI State Management ---
             function showDashboard() {
                 const username = localStorage.getItem(SESSION_KEY);
                 if (!username) return;
-
-                const users = getUsers();
-                const user = users.find(u => u.username === username);
-                if (!user) return;
-
-                mainContent.classList.add('hidden');
-                dashboard.classList.remove('hidden');
-
+                const user = getUsers().find(u => u.username === username);
+                if (!user) { localStorage.removeItem(SESSION_KEY); return; }
+                mainContent.style.display = 'none';
+                dashboard.style.display = 'flex';
                 welcomeMessage.textContent = `خوش آمدی، ${user.username}!`;
                 configLinkEl.textContent = user.config;
             }
 
             function showMainPage() {
-                dashboard.classList.add('hidden');
-                mainContent.classList.remove('hidden');
+                dashboard.style.display = 'none';
+                mainContent.style.display = 'block';
             }
 
-            // --- Dashboard Functionality ---
             copyBtn.addEventListener('click', () => {
                 navigator.clipboard.writeText(configLinkEl.textContent).then(() => {
                     copyFeedback.classList.remove('opacity-0');
-                    setTimeout(() => {
-                        copyFeedback.classList.add('opacity-0');
-                    }, 2000);
-                });
+                    setTimeout(() => { copyFeedback.classList.add('opacity-0'); }, 2000);
+                }).catch(err => console.error('Could not copy text: ', err));
             });
 
-            // --- Initial Check ---
-            // Check if user is already logged in on page load
             if (localStorage.getItem(SESSION_KEY)) {
                 showDashboard();
             }
