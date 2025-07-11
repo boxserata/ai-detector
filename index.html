@@ -3,338 +3,223 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SecureNet VPN - سریع، امن، بدون محدودیت</title>
-    
-    <!-- Tailwind CSS -->
+    <title>نسخه نمایشی هوش مصنوعی چندوجهی</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- Google Fonts (Vazirmatn) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700&display=swap" rel="stylesheet">
-
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;700&display=swap" rel="stylesheet">
     <style>
         body {
             font-family: 'Vazirmatn', sans-serif;
-            background-color: #0d1117;
-            color: #c9d1d9;
-            scroll-behavior: smooth;
         }
-        .glass-effect {
-            background: rgba(22, 27, 34, 0.6);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border: 1px solid rgba(48, 54, 61, 0.5);
+        /* استایل برای انیمیشن درخشان */
+        @keyframes glowing {
+            0% { box-shadow: 0 0 5px #2563eb, 0 0 10px #2563eb; }
+            50% { box-shadow: 0 0 20px #2563eb, 0 0 30px #2563eb; }
+            100% { box-shadow: 0 0 5px #2563eb, 0 0 10px #2563eb; }
         }
-        .btn-primary {
-            background: linear-gradient(90deg, #00c6ff, #0072ff);
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(0, 157, 255, 0.3);
+        .glowing-border {
+            animation: glowing 2s infinite ease-in-out;
         }
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(0, 157, 255, 0.5);
-        }
-        .pricing-toggle-bg { background-color: #161b22; }
-        .pricing-toggle-btn { background-color: #0072ff; transition: transform 0.3s ease; }
-        #world-map-container { position: relative; overflow: hidden; }
-        .server-point { position: absolute; width: 12px; height: 12px; background-color: #00c6ff; border-radius: 50%; cursor: pointer; transition: transform 0.2s ease; }
-        .server-point::before { content: ''; position: absolute; top: 50%; left: 50%; width: 24px; height: 24px; border-radius: 50%; background-color: rgba(0, 198, 255, 0.3); animation: pulse 2s infinite; }
-        .server-point:hover { transform: scale(1.5); }
-        @keyframes pulse { 0% { transform: scale(0.5); opacity: 0.7; } 70% { transform: scale(1.5); opacity: 0; } 100% { transform: scale(0.5); opacity: 0; } }
-        .faq-item-header { transition: background-color 0.3s; }
-        .faq-item-header:hover { background-color: #1c222b; }
-        .faq-icon { transition: transform 0.3s; }
-        .modal-backdrop { transition: opacity 0.3s ease; }
-        .modal-content { transition: transform 0.3s ease, opacity 0.3s ease; }
-        /* Hide scrollbar for textarea */
-        textarea::-webkit-scrollbar { display: none; }
-        textarea { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
 </head>
-<body class="antialiased">
+<body class="bg-gray-900 text-white flex flex-col items-center justify-center min-h-screen p-4">
 
-    <!-- Main Landing Page Content -->
-    <div id="main-content" style="display: block;">
-        <!-- Header -->
-        <header class="fixed top-0 left-0 right-0 z-50 glass-effect">
-            <div class="container mx-auto px-6 py-4 flex justify-between items-center">
-                <h1 class="text-2xl font-bold text-white">SecureNet <span class="text-blue-400">VPN</span></h1>
-                <nav class="hidden md:flex items-center space-x-8 space-x-reverse">
-                    <a href="#features" class="hover:text-blue-400 transition">ویژگی‌ها</a>
-                    <a href="#servers" class="hover:text-blue-400 transition">سرورها</a>
-                    <a href="#pricing" class="hover:text-blue-400 transition">قیمت‌ها</a>
-                    <a href="#faq" class="hover:text-blue-400 transition">پرسش‌های متداول</a>
-                </nav>
-                <button id="login-modal-btn" class="hidden md:block bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-lg transition">ورود / ثبت‌نام</button>
-            </div>
-        </header>
+    <div class="w-full max-w-4xl bg-gray-800 rounded-2xl shadow-2xl p-6 space-y-6">
+        <h1 class="text-3xl font-bold text-center text-blue-400">شبیه‌ساز هوش مصنوعی انسان‌نما</h1>
+        <p class="text-center text-gray-400">با من صحبت کنید و من سعی می‌کنم با استفاده از دوربین و میکروفون شما، محیط را درک کنم.</p>
 
-        <main>
-            <!-- All sections (Hero, Features, etc.) are included here -->
-            <section class="min-h-screen flex items-center justify-center text-center pt-20 relative overflow-hidden"><div class="container mx-auto px-6 z-10"><h2 class="text-4xl md:text-6xl font-bold text-white leading-tight">اینترنت آزاد و امن،<br>تنها با یک کلیک</h2><p class="mt-4 text-lg md:text-xl text-gray-400 max-w-2xl mx-auto">با SecureNet VPN هویت خود را مخفی نگه دارید، به تمام محتوای جهان دسترسی پیدا کنید و از بالاترین سرعت لذت ببرید.</p><div class="mt-8"><a href="#pricing" class="btn-primary text-white font-bold text-lg py-4 px-8 rounded-full inline-block">دریافت سرویس</a></div></div></section>
-            <section id="features" class="py-20"><div class="container mx-auto px-6"><div class="text-center mb-12"><h3 class="text-3xl md:text-4xl font-bold text-white">چرا SecureNet VPN؟</h3><p class="text-gray-400 mt-2">ما بهترین ویژگی‌ها را برای یک تجربه بی‌نقص فراهم کرده‌ایم.</p></div><div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"><div class="glass-effect p-8 rounded-xl text-center"><div class="flex justify-center mb-4"><svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#00c6ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg></div><h4 class="text-xl font-bold text-white mb-2">امنیت فوق‌العاده</h4><p class="text-gray-400">با رمزنگاری پیشرفته AES-256، اطلاعات شما همیشه در امان است.</p></div><div class="glass-effect p-8 rounded-xl text-center"><div class="flex justify-center mb-4"><svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#00c6ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path><polyline points="13 2 13 9 20 9"></polyline></svg></div><h4 class="text-xl font-bold text-white mb-2">بدون ثبت لاگ</h4><p class="text-gray-400">ما به حریم خصوصی شما احترام می‌گذاریم و هیچ فعالیتی را ذخیره نمی‌کنیم.</p></div><div class="glass-effect p-8 rounded-xl text-center"><div class="flex justify-center mb-4"><svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#00c6ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"></path></svg></div><h4 class="text-xl font-bold text-white mb-2">سرعت بی‌نظیر</h4><p class="text-gray-400">سرورهای بهینه ما در سراسر جهان، بالاترین سرعت ممکن را تضمین می‌کنند.</p></div></div></div></section>
-            <section id="servers" class="py-20"><div class="container mx-auto px-6"><div class="text-center mb-12"><h3 class="text-3xl md:text-4xl font-bold text-white">شبکه جهانی سرورها</h3><p class="text-gray-400 mt-2">به بیش از ۵۰ کشور متصل شوید. (روی نقاط نقشه هاور کنید)</p></div><div id="world-map-container" class="w-full max-w-4xl mx-auto"><img src="https://upload.wikimedia.org/wikipedia/commons/8/80/World_map_-_low_resolution.svg" alt="نقشه جهان" class="w-full h-auto opacity-20"/></div></div></section>
-            <section id="pricing" class="py-20"><div class="container mx-auto px-6"><div class="text-center mb-12"><h3 class="text-3xl md:text-4xl font-bold text-white">پلن‌های ما</h3><p class="text-gray-400 mt-2">بهترین پلن را متناسب با نیاز خود انتخاب کنید.</p></div><div class="flex justify-center items-center mb-10"><span class="text-white font-medium">ماهانه</span><div id="pricing-toggle" class="relative inline-block w-14 mx-4 align-middle select-none transition duration-200 ease-in cursor-pointer"><div class="pricing-toggle-bg w-14 h-8 rounded-full"></div><div id="pricing-toggle-button" class="pricing-toggle-btn absolute top-1 right-1 w-6 h-6 rounded-full shadow"></div></div><span class="text-white font-medium">سالانه <span class="text-green-400">(۳۰٪ تخفیف)</span></span></div><div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto"><div class="glass-effect p-8 rounded-xl border-2 border-transparent flex flex-col"><h4 class="text-2xl font-bold text-white">پایه</h4><p class="text-gray-400 mt-2">برای شروع</p><div class="my-6"><span class="text-5xl font-bold text-white" data-price-monthly="150" data-price-yearly="105">۱۵۰</span><span class="text-gray-400"> هزار تومان / ماه</span></div><ul class="space-y-4 text-right flex-grow"><li>...</li></ul><button class="mt-8 w-full bg-gray-700 hover:bg-gray-600 text-white font-bold py-3 px-4 rounded-lg transition">انتخاب پلن</button></div><div class="glass-effect p-8 rounded-xl border-2 border-blue-500 flex flex-col relative"><span class="absolute top-0 right-1/2 transform translate-x-1/2 -translate-y-1/2 bg-blue-500 text-white text-sm font-bold px-4 py-1 rounded-full">پیشنهادی</span><h4 class="text-2xl font-bold text-white">حرفه‌ای</h4><p class="text-gray-400 mt-2">بهترین انتخاب</p><div class="my-6"><span class="text-5xl font-bold text-white" data-price-monthly="250" data-price-yearly="175">۲۵۰</span><span class="text-gray-400"> هزار تومان / ماه</span></div><ul class="space-y-4 text-right flex-grow"><li>...</li></ul><button class="mt-8 w-full btn-primary text-white font-bold py-3 px-4 rounded-lg">انتخاب پلن</button></div><div class="glass-effect p-8 rounded-xl border-2 border-transparent flex flex-col"><h4 class="text-2xl font-bold text-white">تجاری</h4><p class="text-gray-400 mt-2">برای تیم‌ها</p><div class="my-6"><span class="text-5xl font-bold text-white" data-price-monthly="500" data-price-yearly="350">۵۰۰</span><span class="text-gray-400"> هزار تومان / ماه</span></div><ul class="space-y-4 text-right flex-grow"><li>...</li></ul><button class="mt-8 w-full bg-gray-700 hover:bg-gray-600 text-white font-bold py-3 px-4 rounded-lg transition">انتخاب پلن</button></div></div></div></section>
-            <section id="faq" class="py-20"><div class="container mx-auto px-6 max-w-3xl"><div class="text-center mb-12"><h3 class="text-3xl md:text-4xl font-bold text-white">پرسش‌های متداول</h3></div><div class="space-y-4"><div class="faq-item glass-effect rounded-lg overflow-hidden"><div class="faq-item-header p-6 cursor-pointer flex justify-between items-center"><h4 class="text-lg font-semibold text-white">آیا استفاده از VPN قانونی است؟</h4><svg class="faq-icon w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg></div><div class="faq-item-body max-h-0 overflow-hidden transition-all duration-500 ease-in-out"><p class="p-6 pt-0 text-gray-400">...</p></div></div></div></div></section>
-        </main>
-        <footer class="border-t border-gray-800 mt-20"><div class="container mx-auto px-6 py-8 text-center text-gray-500"><p>&copy; 2025 SecureNet VPN. تمامی حقوق محفوظ است.</p></div></footer>
-    </div>
-
-    <!-- User Dashboard (Initially Hidden) -->
-    <div id="dashboard" style="display: none;" class="min-h-screen flex flex-col items-center justify-center p-4">
-        <div class="w-full max-w-2xl text-center">
-            <h2 class="text-3xl md:text-4xl font-bold text-white">داشبورد کاربری</h2>
-            <p id="welcome-message" class="text-lg text-gray-400 mt-2 mb-8">خوش آمدید!</p>
-            <div class="glass-effect p-6 md:p-8 rounded-xl">
-                <h3 class="text-xl font-bold text-white mb-4">سرویس فعال شما</h3>
-                <p class="text-gray-400 mb-2">این لینک کانفیگ شماست. آن را در اپلیکیشن خود وارد کنید.</p>
-                <div class="relative bg-gray-900 p-4 rounded-lg text-left break-all">
-                    <code id="config-link" class="text-green-400"></code>
-                    <button id="copy-btn" class="absolute top-3 left-3 p-2 bg-gray-700 hover:bg-gray-600 rounded-md" title="کپی کردن"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg></button>
-                </div>
-                <p id="copy-feedback" class="text-green-500 mt-2 h-5 transition-opacity opacity-0">کپی شد!</p>
-            </div>
-            <button id="logout-btn" class="mt-8 bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-6 rounded-lg transition">خروج از حساب</button>
-        </div>
-    </div>
-    
-    <!-- Admin Panel (Initially Hidden) -->
-    <div id="admin-panel" style="display: none;" class="min-h-screen p-4 md:p-8">
-        <div class="container mx-auto">
-            <div class="flex justify-between items-center mb-8">
-                <h2 class="text-3xl md:text-4xl font-bold text-white">پنل مدیریت</h2>
-                <button id="admin-logout-btn" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-6 rounded-lg transition">خروج</button>
-            </div>
-            <div id="user-list-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <!-- User cards will be injected here by JS -->
+        <!-- بخش نمایش دوربین -->
+        <div class="relative w-full aspect-video bg-gray-900 rounded-lg overflow-hidden border-2 border-gray-700">
+            <video id="webcam" class="w-full h-full object-cover" autoplay playsinline></video>
+            <canvas id="canvas" class="hidden"></canvas>
+            <div id="loading-overlay" class="absolute inset-0 bg-black bg-opacity-70 flex-col items-center justify-center hidden">
+                 <div class="w-16 h-16 border-4 border-dashed rounded-full animate-spin border-blue-500"></div>
+                 <p class="mt-4 text-lg">در حال پردازش تصویر و صدا...</p>
             </div>
         </div>
-    </div>
 
+        <!-- کنترل‌ها و وضعیت -->
+        <div class="flex flex-col md:flex-row items-center justify-center gap-4">
+            <button id="startButton" class="w-full md:w-auto bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition-all duration-300 transform hover:scale-105">
+                شروع به کار
+            </button>
+            <div id="status" class="text-center p-3 rounded-lg bg-gray-700 text-yellow-400 min-w-[200px]">
+                وضعیت: آماده‌سازی
+            </div>
+        </div>
 
-    <!-- Auth Modal (Login/Register) -->
-    <div id="auth-modal" class="modal-backdrop fixed inset-0 z-50 bg-black bg-opacity-70 flex items-center justify-center p-4 hidden opacity-0">
-        <div class="modal-content glass-effect rounded-2xl w-full max-w-md p-8 transform scale-95 opacity-0">
-            <form id="login-form">
-                <h3 class="text-2xl font-bold text-white text-center mb-6">ورود به حساب کاربری</h3>
-                <div class="space-y-4">
-                    <input type="text" id="login-username" placeholder="نام کاربری" class="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500" required>
-                    <input type="password" id="login-password" placeholder="رمز عبور" class="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500" required>
-                </div>
-                <p id="login-error" class="text-red-500 text-sm text-center h-5 mt-4"></p>
-                <button type="submit" class="w-full mt-4 btn-primary text-white font-bold py-3 rounded-lg">ورود</button>
-                <p class="text-center mt-4 text-gray-400">حساب کاربری ندارید؟ <a href="#" id="show-register-form" class="text-blue-400 hover:underline">ثبت‌نام کنید</a></p>
-            </form>
-            <form id="register-form" class="hidden">
-                <h3 class="text-2xl font-bold text-white text-center mb-6">ایجاد حساب کاربری جدید</h3>
-                <div class="space-y-4">
-                    <input type="text" id="register-username" placeholder="نام کاربری یا شماره تلفن" class="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500" required>
-                    <input type="password" id="register-password" placeholder="رمز عبور" class="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500" required>
-                </div>
-                 <p id="register-error" class="text-red-500 text-sm text-center h-5 mt-4"></p>
-                <button type="submit" class="w-full mt-4 btn-primary text-white font-bold py-3 rounded-lg">ثبت‌نام</button>
-                <p class="text-center mt-4 text-gray-400">قبلاً ثبت‌نام کرده‌اید؟ <a href="#" id="show-login-form" class="text-blue-400 hover:underline">وارد شوید</a></p>
-            </form>
+        <!-- بخش گفتگو -->
+        <div class="space-y-4">
+            <div class="bg-gray-700 p-4 rounded-lg">
+                <h2 class="text-lg font-semibold text-blue-300 mb-2">متن شناسایی شده از صدای شما:</h2>
+                <p id="user-text" class="text-gray-300 min-h-[50px]">...</p>
+            </div>
+            <div class="bg-gray-700 p-4 rounded-lg">
+                <h2 class="text-lg font-semibold text-green-300 mb-2">پاسخ هوش مصنوعی:</h2>
+                <p id="ai-response" class="text-gray-200 min-h-[50px]">...</p>
+            </div>
         </div>
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // --- All interactive logic from previous version is maintained ---
-            // (Map, Pricing, FAQ)
+        // دریافت المان‌های HTML
+        const startButton = document.getElementById('startButton');
+        const webcamVideo = document.getElementById('webcam');
+        const canvas = document.getElementById('canvas');
+        const statusDiv = document.getElementById('status');
+        const userTextDiv = document.getElementById('user-text');
+        const aiResponseDiv = document.getElementById('ai-response');
+        const loadingOverlay = document.getElementById('loading-overlay');
 
-            // --- Auth System (Modal, Forms, localStorage) ---
-            const mainContent = document.getElementById('main-content');
-            const dashboard = document.getElementById('dashboard');
-            const adminPanel = document.getElementById('admin-panel');
-            const authModal = document.getElementById('auth-modal');
-            const modalContent = authModal.querySelector('.modal-content');
-            const loginModalBtn = document.getElementById('login-modal-btn');
-            const logoutBtn = document.getElementById('logout-btn');
-            const adminLogoutBtn = document.getElementById('admin-logout-btn');
-            const loginForm = document.getElementById('login-form');
-            const registerForm = document.getElementById('register-form');
-            const showRegisterLink = document.getElementById('show-register-form');
-            const showLoginLink = document.getElementById('show-login-form');
-            const loginError = document.getElementById('login-error');
-            const registerError = document.getElementById('register-error');
-            
-            const DB_USERS_KEY = 'vpn_users';
-            const SESSION_KEY = 'vpn_session';
+        let isListening = false;
+        let mediaStream = null;
 
-            // --- Admin Credentials ---
-            const ADMIN_USER = 'admin';
-            const ADMIN_PASS = 'adminpass';
+        // --- بخش ۲ (ب): پردازش گفتار (گوش‌ها) ---
+        // راه‌اندازی API تشخیص گفتار مرورگر
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        let recognition;
+        if (SpeechRecognition) {
+            recognition = new SpeechRecognition();
+            recognition.continuous = false; // فقط یک بار گوش می‌دهد
+            recognition.lang = 'fa-IR'; // زبان فارسی
+            recognition.interimResults = false;
+        } else {
+            statusDiv.textContent = 'تشخیص گفتار پشتیبانی نمی‌شود';
+            startButton.disabled = true;
+        }
 
-            function openModal() {
-                authModal.classList.remove('hidden');
-                setTimeout(() => { authModal.classList.remove('opacity-0'); modalContent.classList.remove('scale-95', 'opacity-0'); }, 10);
+        // --- بخش ۱ (الف): بینایی کامپیوتری (چشم‌ها) ---
+        // تابع برای شروع به کار دوربین
+        async function startWebcam() {
+            try {
+                mediaStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+                webcamVideo.srcObject = mediaStream;
+                statusDiv.textContent = 'دوربین و میکروفون فعال شد. صحبت کنید.';
+                startButton.textContent = 'در حال شنیدن...';
+                startButton.classList.add('glowing-border');
+                isListening = true;
+                recognition.start(); // شروع به گوش دادن
+            } catch (err) {
+                console.error("خطا در دسترسی به دوربین/میکروفون:", err);
+                statusDiv.textContent = 'خطا در دسترسی به مدیا';
+                alert('لطفاً اجازه دسترسی به دوربین و میکروفون را بدهید.');
             }
+        }
 
-            function closeModal() {
-                authModal.classList.add('opacity-0');
-                modalContent.classList.add('scale-95', 'opacity-0');
-                setTimeout(() => { authModal.classList.add('hidden'); loginError.textContent = ''; registerError.textContent = ''; }, 300);
-            }
+        // تابع برای گرفتن یک فریم از ویدیو
+        function captureFrame() {
+            canvas.width = webcamVideo.videoWidth;
+            canvas.height = webcamVideo.videoHeight;
+            const context = canvas.getContext('2d');
+            context.drawImage(webcamVideo, 0, 0, canvas.width, canvas.height);
+            // تبدیل تصویر به فرمت Base64
+            return canvas.toDataURL('image/jpeg').split(',')[1];
+        }
 
-            loginModalBtn.addEventListener('click', openModal);
-            authModal.addEventListener('click', (e) => { if (e.target === authModal) closeModal(); });
-            showRegisterLink.addEventListener('click', (e) => { e.preventDefault(); loginForm.classList.add('hidden'); registerForm.classList.remove('hidden'); });
-            showLoginLink.addEventListener('click', (e) => { e.preventDefault(); registerForm.classList.add('hidden'); loginForm.classList.remove('hidden'); });
-
-            function getUsers() { return JSON.parse(localStorage.getItem(DB_USERS_KEY)) || []; }
-            function saveUsers(users) { localStorage.setItem(DB_USERS_KEY, JSON.stringify(users)); }
-
-            registerForm.addEventListener('submit', (e) => {
-                e.preventDefault();
-                const username = document.getElementById('register-username').value.trim();
-                const password = document.getElementById('register-password').value;
-                if (!username || !password) { registerError.textContent = 'نام کاربری و رمز عبور نمی‌توانند خالی باشند.'; return; }
-                if (username.toLowerCase() === ADMIN_USER) { registerError.textContent = 'این نام کاربری غیرمجاز است.'; return; }
-                
-                const users = getUsers();
-                if (users.find(u => u.username.toLowerCase() === username.toLowerCase())) { registerError.textContent = 'این نام کاربری قبلا استفاده شده است.'; return; }
-                
-                // Admin will set the config later.
-                users.push({ username, password, config: 'کانفیگ توسط ادمین تنظیم نشده است.' });
-                saveUsers(users);
-                loginUser(username);
-            });
-
-            loginForm.addEventListener('submit', (e) => {
-                e.preventDefault();
-                const username = document.getElementById('login-username').value;
-                const password = document.getElementById('login-password').value;
-
-                // Admin Login
-                if (username === ADMIN_USER && password === ADMIN_PASS) {
-                    loginUser(ADMIN_USER);
-                    return;
-                }
-
-                // User Login
-                const users = getUsers();
-                const user = users.find(u => u.username === username && u.password === password);
-                if (user) {
-                    loginUser(username);
-                } else {
-                    loginError.textContent = 'نام کاربری یا رمز عبور اشتباه است.';
-                }
-            });
-            
-            function handleLogout() {
-                localStorage.removeItem(SESSION_KEY);
-                showMainPage();
-            }
-            logoutBtn.addEventListener('click', handleLogout);
-            adminLogoutBtn.addEventListener('click', handleLogout);
-
-            function loginUser(username) {
-                localStorage.setItem(SESSION_KEY, username);
-                closeModal();
-                if (username === ADMIN_USER) {
-                    showAdminPanel();
-                } else {
-                    showDashboard();
-                }
-            }
-            
-            function showMainPage() {
-                dashboard.style.display = 'none';
-                adminPanel.style.display = 'none';
-                mainContent.style.display = 'block';
-            }
-
-            // --- User Dashboard Logic ---
-            function showDashboard() {
-                const username = localStorage.getItem(SESSION_KEY);
-                if (!username) return;
-                const user = getUsers().find(u => u.username === username);
-                if (!user) { handleLogout(); return; }
-
-                mainContent.style.display = 'none';
-                adminPanel.style.display = 'none';
-                dashboard.style.display = 'flex';
-                
-                document.getElementById('welcome-message').textContent = `خوش آمدی، ${user.username}!`;
-                document.getElementById('config-link').textContent = user.config;
-            }
-            
-            document.getElementById('copy-btn').addEventListener('click', () => {
-                const configText = document.getElementById('config-link').textContent;
-                navigator.clipboard.writeText(configText).then(() => {
-                    const feedback = document.getElementById('copy-feedback');
-                    feedback.classList.remove('opacity-0');
-                    setTimeout(() => { feedback.classList.add('opacity-0'); }, 2000);
-                });
-            });
-
-            // --- Admin Panel Logic ---
-            function showAdminPanel() {
-                mainContent.style.display = 'none';
-                dashboard.style.display = 'none';
-                adminPanel.style.display = 'block';
-                renderUserList();
-            }
-            
-            function renderUserList() {
-                const container = document.getElementById('user-list-container');
-                container.innerHTML = ''; // Clear previous list
-                const users = getUsers().filter(u => u.username !== ADMIN_USER);
-
-                if (users.length === 0) {
-                    container.innerHTML = `<p class="text-gray-400 col-span-full text-center">هنوز کاربری ثبت‌نام نکرده است.</p>`;
-                    return;
-                }
-
-                users.forEach(user => {
-                    const userCard = document.createElement('div');
-                    userCard.className = 'glass-effect p-4 rounded-lg flex flex-col gap-3';
-                    userCard.innerHTML = `
-                        <div>
-                            <p class="text-lg font-bold text-white">${user.username}</p>
-                            <p class="text-xs text-gray-500">رمز عبور: ${user.password}</p>
-                        </div>
-                        <textarea class="w-full bg-gray-900 border border-gray-700 rounded-lg p-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-blue-500 h-24" placeholder="کانفیگ کاربر را اینجا وارد کنید...">${user.config}</textarea>
-                        <button data-username="${user.username}" class="save-config-btn bg-green-600 hover:bg-green-700 text-white font-bold py-2 rounded-lg transition">ذخیره</button>
-                        <p class="save-feedback text-green-400 text-xs text-center h-4"></p>
-                    `;
-                    container.appendChild(userCard);
-                });
-            }
-            
-            document.getElementById('user-list-container').addEventListener('click', function(e) {
-                if (e.target.classList.contains('save-config-btn')) {
-                    const username = e.target.dataset.username;
-                    const card = e.target.closest('.glass-effect');
-                    const textarea = card.querySelector('textarea');
-                    const newConfig = textarea.value;
-                    
-                    let users = getUsers();
-                    const userIndex = users.findIndex(u => u.username === username);
-                    
-                    if (userIndex !== -1) {
-                        users[userIndex].config = newConfig;
-                        saveUsers(users);
-                        
-                        const feedback = card.querySelector('.save-feedback');
-                        feedback.textContent = 'ذخیره شد!';
-                        setTimeout(() => { feedback.textContent = ''; }, 2000);
-                    }
-                }
-            });
-
-            // --- Initial Check on Load ---
-            const loggedInUser = localStorage.getItem(SESSION_KEY);
-            if (loggedInUser) {
-                if (loggedInUser === ADMIN_USER) {
-                    showAdminPanel();
-                } else {
-                    showDashboard();
-                }
+        // رویداد کلیک روی دکمه شروع
+        startButton.addEventListener('click', () => {
+            if (!isListening) {
+                startWebcam();
             }
         });
+
+        // رویداد وقتی تشخیص گفتار نتیجه‌ای را برمی‌گرداند
+        recognition.onresult = (event) => {
+            const transcript = event.results[0][0].transcript;
+            userTextDiv.textContent = transcript;
+            statusDiv.textContent = 'در حال تحلیل...';
+            loadingOverlay.classList.remove('hidden');
+            loadingOverlay.classList.add('flex');
+
+
+            // در لحظه اتمام صحبت، یک فریم از دوربین بگیر
+            const imageBase64 = captureFrame();
+            
+            // --- بخش ۲: مغز متفکر (ارسال به Gemini) ---
+            callGeminiAPI(transcript, imageBase64);
+        };
+
+        // رویداد وقتی گوش دادن تمام می‌شود
+        recognition.onend = () => {
+            if (isListening) {
+                recognition.start(); // دوباره شروع به گوش دادن کن
+            }
+        };
+        
+        recognition.onerror = (event) => {
+            console.error("خطای تشخیص گفتار:", event.error);
+            if(event.error === 'no-speech') {
+                 // این خطا طبیعی است اگر کاربر صحبت نکند، نیازی به نمایش به کاربر نیست
+            } else {
+                statusDiv.textContent = `خطا: ${event.error}`;
+            }
+        };
+
+
+        // --- بخش ۲ و ۳: شناخت و تولید (ارتباط با Gemini و پاسخ) ---
+        async function callGeminiAPI(text, imageBase64) {
+            const apiKey = ""; // کلید API در محیط Canvas به صورت خودکار تزریق می‌شود
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+            const payload = {
+                contents: [
+                    {
+                        role: "user",
+                        parts: [
+                            { text: `شما یک ربات انسان‌نما هستید. بر اساس این تصویر و سوال کاربر، یک پاسخ کوتاه و مفید به زبان فارسی بدهید. سوال کاربر: "${text}"` },
+                            {
+                                inlineData: {
+                                    mimeType: "image/jpeg",
+                                    data: imageBase64
+                                }
+                            }
+                        ]
+                    }
+                ]
+            };
+
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const result = await response.json();
+                let aiText = "متاسفانه نتوانستم پاسخی تولید کنم.";
+                if (result.candidates && result.candidates.length > 0 &&
+                    result.candidates[0].content && result.candidates[0].content.parts &&
+                    result.candidates[0].content.parts.length > 0) {
+                    aiText = result.candidates[0].content.parts[0].text;
+                }
+                
+                aiResponseDiv.textContent = aiText;
+                // --- بخش ۳ (الف): متن به گفتار (صدا) ---
+                speak(aiText);
+
+            } catch (error) {
+                console.error("خطا در ارتباط با Gemini API:", error);
+                aiResponseDiv.textContent = "خطایی در ارتباط با سرور هوش مصنوعی رخ داد.";
+            } finally {
+                statusDiv.textContent = 'آماده دریافت فرمان بعدی. صحبت کنید.';
+                loadingOverlay.classList.add('hidden');
+                loadingOverlay.classList.remove('flex');
+            }
+        }
+
+        // تابع برای صحبت کردن متن
+        function speak(text) {
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'fa-IR'; // تنظیم زبان برای صدای فارسی
+            utterance.rate = 0.9;
+            window.speechSynthesis.speak(utterance);
+        }
+
     </script>
 </body>
 </html>
