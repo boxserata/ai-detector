@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>نسخه نمایشی هوش مصنوعی چندوجهی</title>
+    <title>شبیه‌ساز هوش مصنوعی انسان‌نما ۲.۰</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -11,59 +11,86 @@
     <style>
         body {
             font-family: 'Vazirmatn', sans-serif;
+            background: radial-gradient(ellipse at bottom, #1b2735 0%, #090a0f 100%);
         }
-        /* استایل برای انیمیشن درخشان */
-        @keyframes glowing {
-            0% { box-shadow: 0 0 5px #2563eb, 0 0 10px #2563eb; }
-            50% { box-shadow: 0 0 20px #2563eb, 0 0 30px #2563eb; }
-            100% { box-shadow: 0 0 5px #2563eb, 0 0 10px #2563eb; }
+        /* انیمیشن برای درخشش و نبض */
+        @keyframes pulse-glow {
+            0%, 100% {
+                box-shadow: 0 0 8px #3b82f6, 0 0 12px #3b82f6;
+                transform: scale(1);
+            }
+            50% {
+                box-shadow: 0 0 16px #60a5fa, 0 0 24px #60a5fa;
+                transform: scale(1.05);
+            }
         }
-        .glowing-border {
-            animation: glowing 2s infinite ease-in-out;
+        .pulse-glow-button {
+            animation: pulse-glow 2.5s infinite ease-in-out;
+        }
+        /* انیمیشن برای نقطه‌های در حال فکر کردن */
+        @keyframes thinking-dots {
+            0%, 20% { content: '.'; }
+            40%, 60% { content: '..'; }
+            80%, 100% { content: '...'; }
+        }
+        .thinking::after {
+            content: '.';
+            animation: thinking-dots 1.5s infinite;
+            display: inline-block;
+            width: 20px;
+            text-align: left;
         }
     </style>
 </head>
-<body class="bg-gray-900 text-white flex flex-col items-center justify-center min-h-screen p-4">
+<body class="text-gray-200 flex flex-col items-center justify-center min-h-screen p-4 overflow-hidden">
 
-    <div class="w-full max-w-4xl bg-gray-800 rounded-2xl shadow-2xl p-6 space-y-6">
-        <h1 class="text-3xl font-bold text-center text-blue-400">شبیه‌ساز هوش مصنوعی انسان‌نما</h1>
-        <p class="text-center text-gray-400">با من صحبت کنید و من سعی می‌کنم با استفاده از دوربین و میکروفون شما، محیط را درک کنم.</p>
+    <!-- نوار اعلان -->
+    <div id="notification" class="fixed top-0 left-0 right-0 bg-red-600 text-white text-center p-3 transform -translate-y-full transition-transform duration-500 z-50">
+        <p id="notification-text"></p>
+    </div>
 
-        <!-- بخش نمایش دوربین -->
-        <div class="relative w-full aspect-video bg-gray-900 rounded-lg overflow-hidden border-2 border-gray-700">
-            <video id="webcam" class="w-full h-full object-cover" autoplay playsinline></video>
-            <canvas id="canvas" class="hidden"></canvas>
-            <div id="loading-overlay" class="absolute inset-0 bg-black bg-opacity-70 flex-col items-center justify-center hidden">
-                 <div class="w-16 h-16 border-4 border-dashed rounded-full animate-spin border-blue-500"></div>
-                 <p class="mt-4 text-lg">در حال پردازش تصویر و صدا...</p>
-            </div>
+    <div class="w-full max-w-6xl bg-black bg-opacity-30 backdrop-blur-sm rounded-2xl shadow-2xl border border-blue-500/30 p-4 md:p-8 space-y-6">
+        <div class="text-center mb-4">
+            <h1 class="text-3xl md:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500">شبیه‌ساز هوش مصنوعی انسان‌نما</h1>
+            <p class="text-gray-400 mt-2">من به محیط اطرافم گوش می‌دهم و آن را می‌بینم. با من صحبت کنید.</p>
         </div>
 
-        <!-- کنترل‌ها و وضعیت -->
-        <div class="flex flex-col md:flex-row items-center justify-center gap-4">
-            <button id="startButton" class="w-full md:w-auto bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition-all duration-300 transform hover:scale-105">
-                شروع به کار
-            </button>
-            <div id="status" class="text-center p-3 rounded-lg bg-gray-700 text-yellow-400 min-w-[200px]">
-                وضعیت: آماده‌سازی
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- ستون چپ: دوربین و کنترل‌ها -->
+            <div class="flex flex-col space-y-4">
+                <div class="relative w-full aspect-video bg-black rounded-lg overflow-hidden border-2 border-blue-500/50 shadow-lg">
+                    <video id="webcam" class="w-full h-full object-cover" autoplay playsinline muted></video>
+                    <canvas id="canvas" class="hidden"></canvas>
+                    <div id="loading-overlay" class="absolute inset-0 bg-black bg-opacity-70 flex-col items-center justify-center hidden z-10">
+                         <div class="w-16 h-16 border-4 border-dashed rounded-full animate-spin border-blue-400"></div>
+                         <p class="mt-4 text-lg">در حال پردازش...</p>
+                    </div>
+                </div>
+                <div class="flex flex-col items-center justify-center gap-4">
+                    <button id="startButton" class="w-full md:w-auto bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-full transition-all duration-300 shadow-lg">
+                        فعال‌سازی سیستم
+                    </button>
+                    <div id="status" class="text-center p-3 rounded-lg bg-gray-800/50 text-yellow-300 min-w-[250px] border border-gray-700">
+                        وضعیت: آماده‌سازی
+                    </div>
+                </div>
             </div>
-        </div>
 
-        <!-- بخش گفتگو -->
-        <div class="space-y-4">
-            <div class="bg-gray-700 p-4 rounded-lg">
-                <h2 class="text-lg font-semibold text-blue-300 mb-2">متن شناسایی شده از صدای شما:</h2>
-                <p id="user-text" class="text-gray-300 min-h-[50px]">...</p>
-            </div>
-            <div class="bg-gray-700 p-4 rounded-lg">
-                <h2 class="text-lg font-semibold text-green-300 mb-2">پاسخ هوش مصنوعی:</h2>
-                <p id="ai-response" class="text-gray-200 min-h-[50px]">...</p>
+            <!-- ستون راست: گفتگو -->
+            <div class="bg-gray-800/50 p-4 rounded-lg border border-gray-700 flex flex-col space-y-4">
+                <div>
+                    <h2 class="text-lg font-semibold text-blue-300 mb-2">ورودی شما (صدا):</h2>
+                    <p id="user-text" class="text-gray-300 min-h-[50px] bg-black/20 p-3 rounded">...</p>
+                </div>
+                <div>
+                    <h2 class="text-lg font-semibold text-green-300 mb-2">پاسخ هوش مصنوعی:</h2>
+                    <p id="ai-response" class="text-gray-200 min-h-[100px] bg-black/20 p-3 rounded">...</p>
+                </div>
             </div>
         </div>
     </div>
 
     <script>
-        // دریافت المان‌های HTML
         const startButton = document.getElementById('startButton');
         const webcamVideo = document.getElementById('webcam');
         const canvas = document.getElementById('canvas');
@@ -71,112 +98,106 @@
         const userTextDiv = document.getElementById('user-text');
         const aiResponseDiv = document.getElementById('ai-response');
         const loadingOverlay = document.getElementById('loading-overlay');
+        const notification = document.getElementById('notification');
+        const notificationText = document.getElementById('notification-text');
 
         let isListening = false;
         let mediaStream = null;
-
-        // --- بخش ۲ (ب): پردازش گفتار (گوش‌ها) ---
-        // راه‌اندازی API تشخیص گفتار مرورگر
-        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         let recognition;
-        if (SpeechRecognition) {
-            recognition = new SpeechRecognition();
-            recognition.continuous = false; // فقط یک بار گوش می‌دهد
-            recognition.lang = 'fa-IR'; // زبان فارسی
-            recognition.interimResults = false;
-        } else {
-            statusDiv.textContent = 'تشخیص گفتار پشتیبانی نمی‌شود';
-            startButton.disabled = true;
+
+        // تابع برای نمایش اعلان
+        function showNotification(message, isError = true) {
+            notificationText.textContent = message;
+            notification.className = `fixed top-0 left-0 right-0 text-white text-center p-3 transform transition-transform duration-500 z-50 ${isError ? 'bg-red-600' : 'bg-blue-600'}`;
+            notification.style.transform = 'translateY(0)';
+            setTimeout(() => {
+                notification.style.transform = 'translateY(-100%)';
+            }, 4000);
         }
 
-        // --- بخش ۱ (الف): بینایی کامپیوتری (چشم‌ها) ---
-        // تابع برای شروع به کار دوربین
-        async function startWebcam() {
+        // راه‌اندازی API تشخیص گفتار
+        try {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            recognition = new SpeechRecognition();
+            recognition.continuous = false;
+            recognition.lang = 'fa-IR';
+            recognition.interimResults = false;
+        } catch (e) {
+            showNotification('مرورگر شما از تشخیص گفتار پشتیبانی نمی‌کند.');
+            startButton.disabled = true;
+        }
+        
+        async function startSystem() {
+            if (isListening) return;
             try {
                 mediaStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
                 webcamVideo.srcObject = mediaStream;
-                statusDiv.textContent = 'دوربین و میکروفون فعال شد. صحبت کنید.';
-                startButton.textContent = 'در حال شنیدن...';
-                startButton.classList.add('glowing-border');
-                isListening = true;
-                recognition.start(); // شروع به گوش دادن
+                webcamVideo.onloadedmetadata = () => {
+                     webcamVideo.play();
+                     statusDiv.textContent = 'سیستم فعال شد. صحبت کنید.';
+                     startButton.textContent = 'در حال شنیدن...';
+                     startButton.classList.add('pulse-glow-button');
+                     isListening = true;
+                     recognition.start();
+                };
             } catch (err) {
                 console.error("خطا در دسترسی به دوربین/میکروفون:", err);
-                statusDiv.textContent = 'خطا در دسترسی به مدیا';
-                alert('لطفاً اجازه دسترسی به دوربین و میکروفون را بدهید.');
+                showNotification('لطفاً اجازه دسترسی به دوربین و میکروفون را بدهید.');
             }
         }
 
-        // تابع برای گرفتن یک فریم از ویدیو
         function captureFrame() {
             canvas.width = webcamVideo.videoWidth;
             canvas.height = webcamVideo.videoHeight;
             const context = canvas.getContext('2d');
             context.drawImage(webcamVideo, 0, 0, canvas.width, canvas.height);
-            // تبدیل تصویر به فرمت Base64
-            return canvas.toDataURL('image/jpeg').split(',')[1];
+            return canvas.toDataURL('image/jpeg', 0.8).split(',')[1];
         }
 
-        // رویداد کلیک روی دکمه شروع
-        startButton.addEventListener('click', () => {
-            if (!isListening) {
-                startWebcam();
-            }
-        });
+        startButton.addEventListener('click', startSystem);
 
-        // رویداد وقتی تشخیص گفتار نتیجه‌ای را برمی‌گرداند
         recognition.onresult = (event) => {
             const transcript = event.results[0][0].transcript;
             userTextDiv.textContent = transcript;
-            statusDiv.textContent = 'در حال تحلیل...';
+            statusDiv.textContent = 'در حال تحلیل درخواست...';
             loadingOverlay.classList.remove('hidden');
             loadingOverlay.classList.add('flex');
+            aiResponseDiv.textContent = '';
+            aiResponseDiv.classList.add('thinking');
 
-
-            // در لحظه اتمام صحبت، یک فریم از دوربین بگیر
             const imageBase64 = captureFrame();
-            
-            // --- بخش ۲: مغز متفکر (ارسال به Gemini) ---
             callGeminiAPI(transcript, imageBase64);
         };
 
-        // رویداد وقتی گوش دادن تمام می‌شود
         recognition.onend = () => {
             if (isListening) {
-                recognition.start(); // دوباره شروع به گوش دادن کن
+                try {
+                    recognition.start();
+                } catch(e) {
+                    // جلوگیری از خطای "already started"
+                }
             }
         };
         
         recognition.onerror = (event) => {
             console.error("خطای تشخیص گفتار:", event.error);
-            if(event.error === 'no-speech') {
-                 // این خطا طبیعی است اگر کاربر صحبت نکند، نیازی به نمایش به کاربر نیست
-            } else {
-                statusDiv.textContent = `خطا: ${event.error}`;
+            if(event.error !== 'no-speech' && event.error !== 'aborted') {
+                showNotification(`خطای میکروفون: ${event.error}`);
             }
         };
 
-
-        // --- بخش ۲ و ۳: شناخت و تولید (ارتباط با Gemini و پاسخ) ---
         async function callGeminiAPI(text, imageBase64) {
-            const apiKey = ""; // کلید API در محیط Canvas به صورت خودکار تزریق می‌شود
+            const apiKey = ""; 
             const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
 
             const payload = {
-                contents: [
-                    {
-                        role: "user",
-                        parts: [
-                            { text: `شما یک ربات انسان‌نما هستید. بر اساس این تصویر و سوال کاربر، یک پاسخ کوتاه و مفید به زبان فارسی بدهید. سوال کاربر: "${text}"` },
-                            {
-                                inlineData: {
-                                    mimeType: "image/jpeg",
-                                    data: imageBase64
-                                }
-                            }
-                        ]
-                    }
-                ]
+                contents: [{
+                    role: "user",
+                    parts: [
+                        { text: `شما یک هوش مصنوعی انسان‌نما، هوشمند و کمی شوخ طبع هستید. به این تصویر نگاه کن و به سوال کاربر به زبان فارسی پاسخ بده. سوال: "${text}"` },
+                        { inlineData: { mimeType: "image/jpeg", data: imageBase64 } }
+                    ]
+                }]
             };
 
             try {
@@ -187,39 +208,40 @@
                 });
 
                 if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
+                    const errorBody = await response.json();
+                    console.error('API Error Body:', errorBody);
+                    throw new Error(`خطای شبکه: ${response.status} ${response.statusText}`);
                 }
 
                 const result = await response.json();
-                let aiText = "متاسفانه نتوانستم پاسخی تولید کنم.";
-                if (result.candidates && result.candidates.length > 0 &&
-                    result.candidates[0].content && result.candidates[0].content.parts &&
-                    result.candidates[0].content.parts.length > 0) {
+                let aiText = "متاسفانه در حال حاضر نمی‌توانم پاسخ دهم. لطفاً دوباره تلاش کنید.";
+                if (result.candidates && result.candidates[0]?.content?.parts[0]?.text) {
                     aiText = result.candidates[0].content.parts[0].text;
                 }
                 
                 aiResponseDiv.textContent = aiText;
-                // --- بخش ۳ (الف): متن به گفتار (صدا) ---
                 speak(aiText);
 
             } catch (error) {
                 console.error("خطا در ارتباط با Gemini API:", error);
-                aiResponseDiv.textContent = "خطایی در ارتباط با سرور هوش مصنوعی رخ داد.";
+                aiResponseDiv.textContent = "یک مشکل در ارتباط با سرور هوش مصنوعی به وجود آمد. لطفاً اتصال اینترنت خود را بررسی کنید.";
+                showNotification(error.message);
             } finally {
-                statusDiv.textContent = 'آماده دریافت فرمان بعدی. صحبت کنید.';
+                statusDiv.textContent = 'آماده دریافت فرمان بعدی';
                 loadingOverlay.classList.add('hidden');
                 loadingOverlay.classList.remove('flex');
+                aiResponseDiv.classList.remove('thinking');
             }
         }
 
-        // تابع برای صحبت کردن متن
         function speak(text) {
+            // توقف هرگونه صدای قبلی
+            window.speechSynthesis.cancel();
             const utterance = new SpeechSynthesisUtterance(text);
-            utterance.lang = 'fa-IR'; // تنظیم زبان برای صدای فارسی
-            utterance.rate = 0.9;
+            utterance.lang = 'fa-IR';
+            utterance.rate = 1;
             window.speechSynthesis.speak(utterance);
         }
-
     </script>
 </body>
 </html>
