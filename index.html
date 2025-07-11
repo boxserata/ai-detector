@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>شبیه‌ساز هوش مصنوعی انسان‌نما ۵.۰</title>
+    <title>شبیه‌ساز هوش مصنوعی انسان‌نما ۶.۰</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -18,12 +18,6 @@
             50% { box-shadow: 0 0 16px #60a5fa, 0 0 24px #60a5fa; transform: scale(1.05); }
         }
         .pulse-glow-button { animation: pulse-glow 2.5s infinite ease-in-out; }
-        @keyframes thinking-dots {
-            0%, 20% { content: '.'; } 40%, 60% { content: '..'; } 80%, 100% { content: '...'; }
-        }
-        .thinking::after { content: '.'; animation: thinking-dots 1.5s infinite; display: inline-block; width: 20px; text-align: left; }
-        .toggle-checkbox:checked { right: 0; border-color: #4A5568; }
-        .toggle-checkbox:checked + .toggle-label { background-color: #2563EB; }
     </style>
 </head>
 <body class="text-gray-200 flex flex-col items-center justify-center min-h-screen p-4 overflow-hidden">
@@ -34,15 +28,15 @@
 
     <div class="w-full max-w-6xl bg-black bg-opacity-30 backdrop-blur-sm rounded-2xl shadow-2xl border border-blue-500/30 p-4 md:p-8 space-y-6">
         <div class="text-center mb-4">
-            <h1 class="text-3xl md:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500">شبیه‌ساز هوش مصنوعی یادگیرنده</h1>
-            <p class="text-gray-400 mt-2">در حالت آنلاین از آب و هوا، اخبار و دیکشنری بپرسید تا یاد بگیرم.</p>
+            <h1 class="text-3xl md:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500">شبیه‌ساز هوش مصنوعی با بینایی زنده</h1>
+            <p class="text-gray-400 mt-2">من به صورت زنده محیط را تحلیل می‌کنم. دست یا چهره خود را مقابل دوربین قرار دهید.</p>
         </div>
         
         <div class="flex items-center justify-center space-x-4 space-x-reverse">
             <span class="text-lg">حالت مستقل (حافظه)</span>
             <div class="relative inline-block w-14 mr-2 align-middle select-none transition duration-200 ease-in">
-                <input type="checkbox" name="toggle" id="ai-mode-toggle" class="toggle-checkbox absolute block w-7 h-7 rounded-full bg-white border-4 appearance-none cursor-pointer"/>
-                <label for="ai-mode-toggle" class="toggle-label block overflow-hidden h-7 rounded-full bg-gray-600 cursor-pointer"></label>
+                <input type="checkbox" name="toggle" id="ai-mode-toggle" class="toggle-checkbox absolute block w-7 h-7 rounded-full bg-white border-4 appearance-none cursor-pointer" style="right: 0; border-color: #4A5568;"/>
+                <label for="ai-mode-toggle" class="toggle-label block overflow-hidden h-7 rounded-full bg-blue-600 cursor-pointer"></label>
             </div>
             <span class="text-lg font-bold text-blue-400">حالت آنلاین (یادگیری)</span>
         </div>
@@ -51,10 +45,11 @@
             <div class="flex flex-col space-y-4">
                 <div class="relative w-full aspect-video bg-black rounded-lg overflow-hidden border-2 border-blue-500/50 shadow-lg">
                     <video id="webcam" class="w-full h-full object-cover" autoplay playsinline muted></video>
+                    <canvas id="output_canvas" class="absolute top-0 left-0 w-full h-full"></canvas>
                 </div>
                 <div class="flex flex-col items-center justify-center gap-4">
                     <button id="startButton" class="w-full md:w-auto bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-full transition-all duration-300 shadow-lg">
-                        فعال‌سازی سیستم
+                        فعال‌سازی سیستم بینایی
                     </button>
                     <div id="status" class="text-center p-3 rounded-lg bg-gray-800/50 text-yellow-300 min-w-[250px] border border-gray-700">
                         وضعیت: آماده‌سازی
@@ -68,16 +63,21 @@
                     <p id="user-text" class="text-gray-300 min-h-[50px] bg-black/20 p-3 rounded">...</p>
                 </div>
                 <div>
-                    <h2 class="text-lg font-semibold text-green-300 mb-2">پاسخ هوش مصنوعی:</h2>
+                    <h2 class="text-lg font-semibold text-green-300 mb-2">پاسخ / واکنش هوش مصنوعی:</h2>
                     <p id="ai-response" class="text-gray-200 min-h-[100px] bg-black/20 p-3 rounded">...</p>
                 </div>
             </div>
         </div>
     </div>
 
-    <script>
+    <script type="module">
+        // FIX 1: Use static import and include FilesetResolver
+        import { FaceDetector, HandLandmarker, DrawingUtils, FilesetResolver } from "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/vision_bundle.js";
+
         const startButton = document.getElementById('startButton');
         const webcamVideo = document.getElementById('webcam');
+        const canvasElement = document.getElementById('output_canvas');
+        const canvasCtx = canvasElement.getContext('2d');
         const statusDiv = document.getElementById('status');
         const userTextDiv = document.getElementById('user-text');
         const aiResponseDiv = document.getElementById('ai-response');
@@ -85,79 +85,143 @@
         const notificationText = document.getElementById('notification-text');
         const aiModeToggle = document.getElementById('ai-mode-toggle');
 
-        let isListening = false;
-        let mediaStream = null;
+        let isSystemActive = false;
         let recognition;
         aiModeToggle.checked = true;
 
-        // حافظه داخلی ربات که به مرور زمان پر می‌شود
+        let faceDetector;
+        let handLandmarker;
+        let drawingUtils; // Initialized later
+        let lastSpokenMessage = "";
+        let lastSpokenTime = 0;
+
         let knowledgeBase = [
-            { keywords: ["سلام", "درود"], response: "سلام. من یک هوش مصنوعی مستقل و یادگیرنده هستم." },
-            { keywords: ["حالت چطوره", "خوبی"], response: "سیستم‌های من کاملا عملیاتی هستند." },
+            { keywords: ["سلام", "درود"], response: "سلام. سیستم بینایی من فعال است." },
             { keywords: ["ساعت", "وقت"], response: () => `ساعت الان ${new Date().toLocaleTimeString('fa-IR')} است.` }
         ];
 
-        function showNotification(message, isError = true) {
-            notificationText.textContent = message;
-            notification.className = `fixed top-0 left-0 right-0 text-white text-center p-3 transform transition-transform duration-500 z-50 ${isError ? 'bg-red-600' : 'bg-blue-600'}`;
-            notification.style.transform = 'translateY(0)';
-            setTimeout(() => { notification.style.transform = 'translateY(-100%)'; }, 4000);
-        }
+        // --- Initialization ---
+        async function initializeVision() {
+            statusDiv.textContent = "در حال بارگذاری مدل‌های بینایی...";
+            
+            // FIX 2: Create a FilesetResolver for the vision tasks to handle WASM and model loading.
+            const vision = await FilesetResolver.forVisionTasks(
+                "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/wasm"
+            );
+            
+            // FIX 3: Update createFromOptions to use the resolver and set runningMode for video.
+            faceDetector = await FaceDetector.createFromOptions(vision, {
+                baseOptions: { 
+                    modelAssetPath: `https://storage.googleapis.com/mediapipe-models/face_detector/blaze_face_short_range/float16/1/blaze_face_short_range.tflite`,
+                    delegate: "GPU"
+                },
+                runningMode: "VIDEO"
+            });
+            
+            handLandmarker = await HandLandmarker.createFromOptions(vision, {
+                baseOptions: { 
+                    modelAssetPath: `https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.tflite`,
+                    delegate: "GPU"
+                },
+                runningMode: "VIDEO",
+                numHands: 2
+            });
 
+            drawingUtils = new DrawingUtils(canvasCtx);
+            
+            statusDiv.textContent = "مدل‌ها بارگذاری شدند. آماده فعال‌سازی.";
+        }
+        initializeVision();
+
+        // --- Speech Recognition Setup ---
         try {
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
             recognition = new SpeechRecognition();
             recognition.continuous = false;
             recognition.lang = 'fa-IR';
             recognition.interimResults = false;
-        } catch (e) {
-            showNotification('مرورگر شما از تشخیص گفتار پشتیبانی نمی‌کند.');
-            startButton.disabled = true;
-        }
-        
+        } catch (e) { showNotification('مرورگر شما از تشخیص گفتار پشتیبانی نمی‌کند.'); }
+
+        // --- Core Functions ---
         async function startSystem() {
-            if (isListening) return;
+            if (isSystemActive) return;
             try {
-                mediaStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-                webcamVideo.srcObject = mediaStream;
-                webcamVideo.onloadedmetadata = () => {
-                     webcamVideo.play();
-                     statusDiv.textContent = 'سیستم فعال شد. صحبت کنید.';
-                     startButton.textContent = 'در حال شنیدن...';
-                     startButton.classList.add('pulse-glow-button');
-                     isListening = true;
-                     recognition.start();
-                };
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+                webcamVideo.srcObject = stream;
+                webcamVideo.addEventListener('loadeddata', () => {
+                    isSystemActive = true;
+                    statusDiv.textContent = 'سیستم بینایی فعال است.';
+                    startButton.textContent = 'سیستم فعال';
+                    startButton.classList.add('pulse-glow-button');
+                    if(recognition) recognition.start();
+                    predictWebcam();
+                });
             } catch (err) { showNotification('لطفاً اجازه دسترسی به دوربین و میکروفون را بدهید.'); }
         }
 
+        let lastVideoTime = -1;
+        async function predictWebcam() {
+            if (!isSystemActive) return;
+
+            const video = webcamVideo;
+            // FIX 4: Use detectForVideo for better performance and correct API usage with video streams.
+            if (video.readyState === 4) { // Ensure video is ready
+                if (video.currentTime !== lastVideoTime) {
+                    lastVideoTime = video.currentTime;
+                    canvasElement.width = video.videoWidth;
+                    canvasElement.height = video.videoHeight;
+
+                    const startTimeMs = performance.now();
+                    const faceDetectionsResult = faceDetector.detectForVideo(video, startTimeMs);
+                    const handLandmarksResult = handLandmarker.detectForVideo(video, startTimeMs);
+                    
+                    canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
+                    
+                    if (faceDetectionsResult.detections.length > 0) {
+                        for (const detection of faceDetectionsResult.detections) {
+                            drawingUtils.drawBoundingBox(detection.boundingBox, { color: '#FFC0CB', lineWidth: 4 });
+                        }
+                        proactiveSpeak("چهره‌ای را می‌بینم.");
+                    }
+                    
+                    if (handLandmarksResult.landmarks.length > 0) {
+                        for (const landmarks of handLandmarksResult.landmarks) {
+                            drawingUtils.drawConnectors(landmarks, HandLandmarker.HAND_CONNECTIONS, { color: '#00FF00', lineWidth: 5 });
+                            drawingUtils.drawLandmarks(landmarks, { color: '#FF0000', radius: 5 });
+                        }
+                        proactiveSpeak("یک یا چند دست را تشخیص دادم.");
+                    }
+                }
+            }
+            window.requestAnimationFrame(predictWebcam);
+        }
+
+        // --- Event Listeners ---
         startButton.addEventListener('click', startSystem);
 
-        recognition.onresult = async (event) => {
-            const transcript = event.results[0][0].transcript;
-            userTextDiv.textContent = transcript;
-            aiResponseDiv.textContent = '';
-            const lowerCaseTranscript = transcript.toLowerCase();
-            
-            if (aiModeToggle.checked) {
-                // --- حالت آنلاین (یادگیری از سرویس‌ها) ---
-                if (lowerCaseTranscript.includes("آب و هوا")) {
-                    await fetchWeather();
-                } else if (lowerCaseTranscript.includes("خبر")) {
-                    await fetchNews();
-                } else if (lowerCaseTranscript.startsWith("معنی")) {
-                    const word = transcript.split(' ').pop();
-                    await fetchDefinition(word);
-                } else {
-                    setAIResponse("در حالت آنلاین، از من درباره آب و هوا، اخبار یا معنی کلمات انگلیسی بپرسید.");
+        if (recognition) {
+            recognition.onresult = async (event) => {
+                const transcript = event.results[0][0].transcript;
+                userTextDiv.textContent = transcript;
+                const lowerCaseTranscript = transcript.toLowerCase();
+                
+                if (aiModeToggle.checked) { // Online Mode
+                    if (lowerCaseTranscript.includes("آب و هوا")) await fetchWeather();
+                    else if (lowerCaseTranscript.includes("خبر")) await fetchNews();
+                    else if (lowerCaseTranscript.startsWith("معنی")) {
+                        const word = transcript.split(' ').pop();
+                        await fetchDefinition(word);
+                    } else {
+                        setAIResponse("در حالت آنلاین، از من درباره آب و هوا، اخبار یا معنی کلمات بپرسید.");
+                    }
+                } else { // Offline Mode
+                    runLocalAI(transcript);
                 }
-            } else {
-                // --- حالت مستقل (استفاده از حافظه) ---
-                statusDiv.textContent = 'پردازش از حافظه داخلی...';
-                runLocalAI(transcript);
-            }
-        };
+            };
+            recognition.onend = () => { if (isSystemActive) recognition.start(); };
+        }
 
+        // --- Helper Functions ---
         function runLocalAI(transcript) {
             const lowerCaseTranscript = transcript.toLowerCase();
             let foundResponse = null;
@@ -167,18 +231,14 @@
                     break;
                 }
             }
-            const responseText = foundResponse || "این اطلاعات در حافظه من نیست. برای یادگیری، به حالت آنلاین بروید و دوباره بپرسید.";
+            const responseText = foundResponse || "این اطلاعات در حافظه من نیست.";
             setAIResponse(responseText);
         }
-        
-        // تابع یادگیری: اطلاعات جدید را به حافظه اضافه می‌کند
+
         function assimilateKnowledge(keywords, answer) {
-             const alreadyExists = knowledgeBase.some(item => 
-                item.keywords.some(k => keywords.some(newK => newK === k))
-            );
+             const alreadyExists = knowledgeBase.some(item => item.keywords.some(k => keywords.includes(k)));
             if (!alreadyExists) {
                 knowledgeBase.push({ keywords, response: answer });
-                console.log("دانش جدید ذخیره شد:", { keywords, answer });
                 showNotification("اطلاعات جدید به حافظه داخلی اضافه شد!", false);
             }
         }
@@ -187,49 +247,29 @@
             statusDiv.textContent = "در حال دریافت اطلاعات آب و هوا...";
             try {
                 const response = await fetch('https://api.open-meteo.com/v1/forecast?latitude=35.69&longitude=51.42&current=temperature_2m');
-                if (!response.ok) throw new Error("سرویس هواشناسی در دسترس نیست.");
                 const data = await response.json();
-                const temp = data.current.temperature_2m;
-                const responseText = `در حال حاضر دمای هوای تهران ${temp} درجه سانتی‌گراد است.`;
+                const responseText = `دمای هوای تهران ${data.current.temperature_2m} درجه است.`;
                 setAIResponse(responseText);
-                assimilateKnowledge(["آب و هوا"], responseText); // یادگیری
-            } catch (error) {
-                setAIResponse("متاسفانه نتوانستم اطلاعات آب و هوا را دریافت کنم.");
-            }
+                assimilateKnowledge(["آب و هوا"], responseText);
+            } catch (error) { setAIResponse("خطا در دریافت اطلاعات آب و هوا."); }
         }
 
         async function fetchDefinition(word) {
-            if (!word || word.length < 2) {
-                setAIResponse("لطفا یک کلمه معتبر برای پیدا کردن معنی بگویید.");
-                return;
-            }
             statusDiv.textContent = `در حال جستجوی معنی "${word}"...`;
             try {
                 const response = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word}`);
-                if (!response.ok) throw new Error(`کلمه "${word}" پیدا نشد.`);
                 const data = await response.json();
-                const definition = data[0].meanings[0].definitions[0].definition;
-                const responseText = `معنی "${word}": ${definition}`;
+                const responseText = `معنی "${word}": ${data[0].meanings[0].definitions[0].definition}`;
                 setAIResponse(responseText);
-                assimilateKnowledge([word.toLowerCase(), "معنی"], responseText); // یادگیری
-            } catch (error) {
-                 setAIResponse(`متاسفانه معنی کلمه "${word}" را پیدا نکردم.`);
-                 showNotification(error.message, true);
-            }
+                assimilateKnowledge([word.toLowerCase()], responseText);
+            } catch (error) { setAIResponse(`معنی کلمه "${word}" پیدا نشد.`); }
         }
         
         async function fetchNews() {
-            statusDiv.textContent = "در حال دریافت آخرین اخبار...";
-            // این یک سرویس شبیه‌سازی شده است تا نیاز به کلید API نباشد
-            const mockNews = [
-                "تیم ملی فوتبال در مسابقات آسیایی به پیروزی رسید.",
-                "فناوری جدیدی برای باتری‌های با عمر طولانی‌تر معرفی شد.",
-                "فستیوال فیلم‌های کوتاه با معرفی برندگان به کار خود پایان داد."
-            ];
-            const newsItem = mockNews[Math.floor(Math.random() * mockNews.length)];
-            const responseText = `آخرین خبر: ${newsItem}`;
+            const mockNews = ["فناوری جدیدی برای باتری‌های با عمر طولانی‌تر معرفی شد."];
+            const responseText = `آخرین خبر: ${mockNews[0]}`;
             setAIResponse(responseText);
-            assimilateKnowledge(["خبر"], responseText); // یادگیری
+            assimilateKnowledge(["خبر"], responseText);
         }
         
         function setAIResponse(text) {
@@ -237,24 +277,30 @@
             speak(text);
             statusDiv.textContent = 'آماده دریافت فرمان بعدی';
         }
+        
+        function proactiveSpeak(text) {
+            const now = Date.now();
+            if (text !== lastSpokenMessage || now - lastSpokenTime > 7000) { // 7 second cooldown
+                setAIResponse(text);
+                lastSpokenMessage = text;
+                lastSpokenTime = now;
+            }
+        }
 
         function speak(text) {
             window.speechSynthesis.cancel();
             const utterance = new SpeechSynthesisUtterance(text);
             utterance.lang = 'fa-IR';
-            utterance.rate = 1;
-            // تلاش برای پیدا کردن صدای فارسی
-            const voices = window.speechSynthesis.getVoices();
-            const farsiVoice = voices.find(voice => voice.lang === 'fa-IR');
-            if (farsiVoice) {
-                utterance.voice = farsiVoice;
-            }
+            utterance.rate = 1.1;
             window.speechSynthesis.speak(utterance);
         }
 
-        recognition.onend = () => { if (isListening) { try { recognition.start(); } catch(e) {} } };
-        recognition.onerror = (event) => { if(event.error !== 'no-speech' && event.error !== 'aborted') { showNotification(`Microphone error: ${event.error}`); } };
-        
+        function showNotification(message, isError = true) {
+            notificationText.textContent = message;
+            notification.className = `fixed top-0 left-0 right-0 text-white text-center p-3 transform transition-transform duration-500 z-50 ${isError ? 'bg-red-600' : 'bg-blue-600'}`;
+            notification.style.transform = 'translateY(0)';
+            setTimeout(() => { notification.style.transform = 'translateY(-100%)'; }, 4000);
+        }
     </script>
 </body>
 </html>
